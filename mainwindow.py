@@ -43,7 +43,8 @@ class MainWindow(QWidget):
         print(filePath)
         for index in range(self.rightListWidget.count()):
             fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discList, self.rightListWidget.item(index).text()), self.fileData)
-            doc = parser.ReadDocxTemplate('./examples/RPD_backup.docx')
+            doc = parser.ReadDocxTemplate('./examples/RPD.docx')
+            # doc = parser.ReadDocxTemplate('./examples/RPD_backup.docx')
             doc = parser.GenerateDocx(fullInf, doc)
             parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
         self.rightListWidget.clear()

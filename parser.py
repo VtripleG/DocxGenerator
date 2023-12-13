@@ -108,8 +108,6 @@ def GenerateDocx(dictInf: dict, doc: Document):
             allCol = 3
             for _ in range(3 * 13):
                 __DeleteRow(doc.tables[2].rows[-1])
-    doc.save(f"./data/{dictInf['Название']}.docx")
-    doc = ReadDocxTemplate(f"./data/{dictInf['Название']}.docx")
     allTimeDict = dict()
     for key in dictTime.keys():
         if 'Практические занятия' in dictTime.get(key).keys():
