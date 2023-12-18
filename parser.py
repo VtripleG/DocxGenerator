@@ -49,29 +49,24 @@ def XmlToDict(fileName):
         xml_data = xmltodict.parse(xml_file.read())
     return xml_data
 
-def GenerateDocx(dictInf: dict, doc: Document):
+def GenerateDocxOch(dictInf: dict, doc: Document):
     doc.tables[0].cell(0, 1).paragraphs[1].runs[1].text = 'ФИТКБ'  # Hаименование факультета
     doc.tables[0].cell(0, 1).paragraphs[1].runs[1].underline = WD_UNDERLINE.SINGLE
     doc.tables[0].cell(0, 1).paragraphs[3].runs[1].text = 'А.В. Бредихин'  # Декан факультета
-    doc.tables[0].cell(0, 1).paragraphs[1].runs[2].underline = WD_UNDERLINE.SINGLE
-    doc.paragraphs[8].runs[1].text = dictInf['Название']  # наименование дисциплины
-    doc.paragraphs[8].runs[1].underline = WD_UNDERLINE.SINGLE
+    # doc.tables[0].cell(0, 1).paragraphs[1].runs[2].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[8].runs[0].text = f"{dictInf['Название']}"  # наименование дисциплины
+    doc.paragraphs[8].runs[0].underline = WD_UNDERLINE.SINGLE
     doc.paragraphs[12].runs[3].text = dictInf['Специальность']  # Направление подготовки
     doc.paragraphs[12].runs[3].underline = WD_UNDERLINE.SINGLE
     doc.paragraphs[14].runs[2].text = dictInf['Профиль']  # Профиль
     doc.paragraphs[14].runs[2].underline = WD_UNDERLINE.SINGLE
     doc.paragraphs[16].runs[1].text = dictInf['Квалификация']  # Квалификация выпускника
     doc.paragraphs[16].runs[1].underline = WD_UNDERLINE.SINGLE
-    doc.paragraphs[18].runs[1].text = '2022-2023' + '/' + '2022-2023'  # Нормативный период обучения
+    doc.paragraphs[18].runs[1].text = '2022-2023'  # Нормативный период обучения
     doc.paragraphs[18].runs[1].underline = WD_UNDERLINE.SINGLE
-    doc.paragraphs[18].runs[2].text = ''
-    doc.paragraphs[18].runs[3].text = ''
-    doc.paragraphs[18].runs[4].text = ''
-    doc.paragraphs[18].runs[5].text = ''
-    doc.paragraphs[18].runs[6].text = ''
-    doc.paragraphs[49].runs[2].text = dictInf['Название']  # Дисциплина (модуль)
-    doc.paragraphs[49].runs[2].underline = WD_UNDERLINE.SINGLE
-    doc.paragraphs[54].runs[1].text = dictInf['Название']  # Процесс изучения дисциплины
+    doc.paragraphs[49].runs[1].text = f"{dictInf['Название']}"  # Дисциплина (модуль)
+    doc.paragraphs[49].runs[1   ].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[54].runs[1].text = f"{dictInf['Название']}"  # Процесс изучения дисциплины
     doc.paragraphs[54].runs[1].underline = WD_UNDERLINE.SINGLE
     startRow = 2
     for object in dictInf['Компетенции'].keys():
@@ -80,7 +75,7 @@ def GenerateDocx(dictInf: dict, doc: Document):
     for _ in range(4 - len(dictInf['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[1].rows[-1])
-    doc.paragraphs[64].runs[1].text = dictInf['Название']  # Общая трудоемкость дисциплины
+    doc.paragraphs[64].runs[1].text = f"{dictInf['Название']}"  # Общая трудоемкость дисциплины
     doc.paragraphs[64].runs[1].underline = WD_UNDERLINE.SINGLE
     dictTime = dictInf['Часы']
     match len(dictTime):
@@ -179,8 +174,8 @@ def GenerateDocx(dictInf: dict, doc: Document):
             doc.tables[2].cell(12, startCol).paragraphs[0].runs[0].text = dictTime.get(key)['ЗЕТ']
             doc.tables[2].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDict['ЗЕТ'])
         startCol += 3
-    doc.paragraphs[64].runs[3].text = str(allTimeDict['ЗЕТ'])  # Общая трудоемкость дисциплины
-    doc.paragraphs[64].runs[3].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[64].runs[5].text = str(allTimeDict['ЗЕТ'])  # Общая трудоемкость дисциплины
+    doc.paragraphs[64].runs[5].underline = WD_UNDERLINE.SINGLE
     for key in allTimeDict:
         match key:
             case 'Лекционные занятия':
@@ -193,8 +188,8 @@ def GenerateDocx(dictInf: dict, doc: Document):
                 doc.tables[4].cell(3, 6).text = str(allTimeDict[key])
             case 'Итого часов':
                 doc.tables[4].cell(3, 7).text = str(allTimeDict[key])
-    doc.paragraphs[158].runs[1].text = dictInf['Название']  # По дисциплине
-    doc.paragraphs[158].runs[1].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[158].runs[3].text = f"{dictInf['Название']}"  # По дисциплине
+    doc.paragraphs[158].runs[3].underline = WD_UNDERLINE.SINGLE
     startRow = 2
     for key in dictInf['Компетенции'].keys():
         doc.tables[7].cell(startRow, 0).paragraphs[0].runs[0].text = key
@@ -227,6 +222,288 @@ def GenerateDocx(dictInf: dict, doc: Document):
     doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
     return doc
 
+def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
+    doc.tables[0].cell(0, 1).paragraphs[1].runs[1].text = 'ФИТКБ'  # Hаименование факультета
+    doc.tables[0].cell(0, 1).paragraphs[1].runs[1].underline = WD_UNDERLINE.SINGLE
+    doc.tables[0].cell(0, 1).paragraphs[3].runs[1].text = 'А.В. Бредихин'  # Декан факультета
+    doc.paragraphs[8].runs[0].text = f"{dictInfO['Название']}"  # наименование дисциплины
+    doc.paragraphs[8].runs[0].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[12].runs[3].text = dictInfO['Специальность']  # Направление подготовки
+    doc.paragraphs[12].runs[3].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[14].runs[2].text = dictInfO['Профиль']  # Профиль
+    doc.paragraphs[14].runs[2].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[16].runs[1].text = dictInfO['Квалификация']  # Квалификация выпускника
+    doc.paragraphs[16].runs[1].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[18].runs[1].text = '2022-2023' + '/' + '2022-2023'  # Нормативный период обучения
+    doc.paragraphs[18].runs[1].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[49].runs[1].text = f"{dictInfO['Название']}"  # Дисциплина (модуль)
+    doc.paragraphs[49].runs[1].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[54].runs[1].text = f"{dictInfO['Название']}"  # Процесс изучения дисциплины
+    doc.paragraphs[54].runs[1].underline = WD_UNDERLINE.SINGLE
+    startRow = 2
+    for object in dictInfO['Компетенции'].keys():
+        doc.tables[1].cell(startRow, 0).text = object
+        startRow += 2
+    for _ in range(4 - len(dictInfO['Компетенции'])):
+        for _ in range(3):
+            __DeleteRow(doc.tables[1].rows[-1])
+    doc.paragraphs[64].runs[1].text = f"{dictInfO['Название']}"  # Общая трудоемкость дисциплины
+    doc.paragraphs[64].runs[1].underline = WD_UNDERLINE.SINGLE
+    dictTimeOch = dictInfO['Часы']
+    match len(dictTimeOch):
+        case 1:
+            startCol = 4
+            allCol = 3
+            for _ in range(3 * 13):
+                __DeleteRow(doc.tables[2].rows[-1])
+        case 2:
+            startCol = 8
+            allCol = 3
+            for _ in range(13):
+                __DeleteRow(doc.tables[2].rows[0])
+            for _ in range(2 * 13):
+                __DeleteRow(doc.tables[2].rows[-1])
+        case 3:
+            startCol = 5
+            allCol = 3
+            for _ in range(2 * 13):
+                __DeleteRow(doc.tables[2].rows[0])
+            for _ in range(13):
+                __DeleteRow(doc.tables[2].rows[-1])
+        case 4:
+            startCol = 8
+            allCol = 3
+            for _ in range(3 * 13):
+                __DeleteRow(doc.tables[2].rows[-1])
+    allTimeDictOch = dict()
+    for key in dictTimeOch.keys():
+        if 'Практические занятия' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['Практические занятия'] += int(dictTimeOch.get(key)['Практические занятия'])
+            except:
+                allTimeDictOch['Практические занятия'] = int(dictTimeOch.get(key)['Практические занятия'])
+        if 'Лабораторные занятия' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['Лабораторные занятия'] += int(dictTimeOch.get(key)['Лабораторные занятия'])
+            except:
+                allTimeDictOch['Лабораторные занятия'] = int(dictTimeOch.get(key)['Лабораторные занятия'])
+        if 'Самостоятельная работа' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['Самостоятельная работа'] += int(dictTimeOch.get(key)['Самостоятельная работа'])
+            except:
+                allTimeDictOch['Самостоятельная работа'] = int(dictTimeOch.get(key)['Самостоятельная работа'])
+        if 'Лекционные занятия' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['Лекционные занятия'] += int(dictTimeOch.get(key)['Лекционные занятия'])
+            except:
+                allTimeDictOch['Лекционные занятия'] = int(dictTimeOch.get(key)['Лекционные занятия'])
+        if 'Итого часов' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['Итого часов'] += int(dictTimeOch.get(key)['Итого часов'])
+            except:
+                allTimeDictOch['Итого часов'] = int(dictTimeOch.get(key)['Итого часов'])
+        if 'ЗЕТ' in dictTimeOch.get(key).keys():
+            try:
+                allTimeDictOch['ЗЕТ'] += int(dictTimeOch.get(key)['ЗЕТ'])
+            except:
+                allTimeDictOch['ЗЕТ'] = int(dictTimeOch.get(key)['ЗЕТ'])
+        if 'Курсовой проект' in dictTimeOch.get(key).keys():
+            allTimeDictOch['Курсовой проект'] = int(dictTimeOch.get(key)['Курсовой проект'])
+        if 'Контрольная работа' in dictTimeOch.get(key).keys():
+            allTimeDictOch['Контрольная работа'] = int(dictTimeOch.get(key)['Контрольная работа'])
+    for key in dictTimeOch.keys():
+        doc.tables[2].cell(1, startCol).paragraphs[0].runs[0].text = str(key)
+        if 'Лекционные занятия' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(4, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['Лекционные занятия']
+            doc.tables[2].cell(4, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['Лекционные занятия'])
+        if 'Практические занятия' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(5, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['Практические занятия']
+            doc.tables[2].cell(5, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['Практические занятия'])
+        if 'Лабораторные занятия' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(6, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['Лабораторные занятия']
+            doc.tables[2].cell(6, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['Лабораторные занятия'])
+        if 'Самостоятельная работа' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(7, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['Самостоятельная работа']
+            doc.tables[2].cell(7, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['Самостоятельная работа'])
+        if 'Курсовой проект' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(8, startCol).paragraphs[0].runs[0].text = '+'
+        else:
+            doc.tables[2].cell(8, startCol).paragraphs[0].runs[0].text = '-'
+        if 'Контрольная работа' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(9, startCol).paragraphs[0].runs[0].text = '+'
+        else:
+            doc.tables[2].cell(9, startCol).paragraphs[0].runs[0].text = '-'
+        if 'Зачет' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(10, startCol).paragraphs[0].runs[0].text = 'Зачет'
+        elif 'Зачет с оценкой' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(10, startCol).paragraphs[0].runs[0].text = 'Зачет с оценкой'
+        elif 'Экзамен' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(10, startCol).paragraphs[0].runs[0].text = 'Экзамен'
+        if 'Итого часов' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(11, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['Итого часов']
+            doc.tables[2].cell(11, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['Итого часов'])
+        if 'ЗЕТ' in dictTimeOch.get(key).keys():
+            doc.tables[2].cell(12, startCol).paragraphs[0].runs[0].text = dictTimeOch.get(key)['ЗЕТ']
+            doc.tables[2].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDictOch['ЗЕТ'])
+        startCol += 3
+    doc.paragraphs[64].runs[5].text = str(allTimeDictOch['ЗЕТ'])  # Общая трудоемкость дисциплины
+    doc.paragraphs[64].runs[5].underline = WD_UNDERLINE.SINGLE
+    for key in allTimeDictOch:
+        match key:
+            case 'Лекционные занятия':
+                doc.tables[4].cell(3, 3).text = str(allTimeDictOch[key])
+            case 'Практические занятия':
+                doc.tables[4].cell(3, 4).text = str(allTimeDictOch[key])
+            case 'Лабораторные занятия':
+                doc.tables[4].cell(3, 5).text = str(allTimeDictOch[key])
+            case 'Самостоятельная работа':
+                doc.tables[4].cell(3, 6).text = str(allTimeDictOch[key])
+            case 'Итого часов':
+                doc.tables[4].cell(3, 7).text = str(allTimeDictOch[key])
+    # ___________________________________________________________________
+    dictTimeZ = dictInfZ['Часы']
+    match len(dictTimeZ):
+        case 1:
+            startCol = 4
+            allCol = 3
+            for _ in range(3 * 13):
+                __DeleteRow(doc.tables[3].rows[-1])
+        case 2:
+            startCol = 8
+            allCol = 3
+            for _ in range(13):
+                __DeleteRow(doc.tables[3].rows[0])
+            for _ in range(2 * 13):
+                __DeleteRow(doc.tables[3].rows[-1])
+        case 3:
+            startCol = 5
+            allCol = 3
+            for _ in range(2 * 13):
+                __DeleteRow(doc.tables[3].rows[0])
+            for _ in range(13):
+                __DeleteRow(doc.tables[3].rows[-1])
+        case 4:
+            startCol = 8
+            allCol = 3
+            for _ in range(3 * 13):
+                __DeleteRow(doc.tables[3].rows[-1])
+    allTimeDictZ = dict()
+    for key in dictTimeZ.keys():
+        if 'Практические занятия' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['Практические занятия'] += int(dictTimeZ.get(key)['Практические занятия'])
+            except:
+                allTimeDictZ['Практические занятия'] = int(dictTimeZ.get(key)['Практические занятия'])
+        if 'Лабораторные занятия' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['Лабораторные занятия'] += int(dictTimeZ.get(key)['Лабораторные занятия'])
+            except:
+                allTimeDictZ['Лабораторные занятия'] = int(dictTimeZ.get(key)['Лабораторные занятия'])
+        if 'Самостоятельная работа' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['Самостоятельная работа'] += int(dictTimeZ.get(key)['Самостоятельная работа'])
+            except:
+                allTimeDictZ['Самостоятельная работа'] = int(dictTimeZ.get(key)['Самостоятельная работа'])
+        if 'Лекционные занятия' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['Лекционные занятия'] += int(dictTimeZ.get(key)['Лекционные занятия'])
+            except:
+                allTimeDictZ['Лекционные занятия'] = int(dictTimeZ.get(key)['Лекционные занятия'])
+        if 'Итого часов' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['Итого часов'] += int(dictTimeZ.get(key)['Итого часов'])
+            except:
+                allTimeDictZ['Итого часов'] = int(dictTimeZ.get(key)['Итого часов'])
+        if 'ЗЕТ' in dictTimeZ.get(key).keys():
+            try:
+                allTimeDictZ['ЗЕТ'] += int(dictTimeZ.get(key)['ЗЕТ'])
+            except:
+                allTimeDictZ['ЗЕТ'] = int(dictTimeZ.get(key)['ЗЕТ'])
+        if 'Курсовой проект' in dictTimeZ.get(key).keys():
+            allTimeDictZ['Курсовой проект'] = int(dictTimeZ.get(key)['Курсовой проект'])
+        if 'Контрольная работа' in dictTimeZ.get(key).keys():
+            allTimeDictZ['Контрольная работа'] = int(dictTimeZ.get(key)['Контрольная работа'])
+    for key in dictTimeZ.keys():
+        doc.tables[3].cell(1, startCol).paragraphs[0].runs[0].text = str(key)
+        if 'Лекционные занятия' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(4, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Лекционные занятия']
+            doc.tables[3].cell(4, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Лекционные занятия'])
+        if 'Практические занятия' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(5, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Практические занятия']
+            doc.tables[3].cell(5, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Практические занятия'])
+        if 'Лабораторные занятия' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(6, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Лабораторные занятия']
+            doc.tables[3].cell(6, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Лабораторные занятия'])
+        if 'Самостоятельная работа' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(7, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Самостоятельная работа']
+            doc.tables[3].cell(7, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Самостоятельная работа'])
+        if 'Курсовой проект' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(8, startCol).paragraphs[0].runs[0].text = '+'
+        else:
+            doc.tables[3].cell(8, startCol).paragraphs[0].runs[0].text = '-'
+        if 'Контрольная работа' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(9, startCol).paragraphs[0].runs[0].text = '+'
+        else:
+            doc.tables[3].cell(9, startCol).paragraphs[0].runs[0].text = '-'
+        if 'Зачет' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(10, startCol).paragraphs[0].runs[0].text = 'Зачет'
+        elif 'Зачет с оценкой' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(10, startCol).paragraphs[0].runs[0].text = 'Зачет с оценкой'
+        elif 'Экзамен' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(10, startCol).paragraphs[0].runs[0].text = 'Экзамен'
+        if 'Итого часов' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(11, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Итого часов']
+            doc.tables[3].cell(11, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Итого часов'])
+        if 'ЗЕТ' in dictTimeZ.get(key).keys():
+            doc.tables[3].cell(12, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['ЗЕТ']
+            doc.tables[3].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['ЗЕТ'])
+        startCol += 3
+    for key in allTimeDictZ:
+        match key:
+            case 'Лекционные занятия':
+                doc.tables[5].cell(3, 3).text = str(allTimeDictZ[key])
+            case 'Практические занятия':
+                doc.tables[5].cell(3, 4).text = str(allTimeDictZ[key])
+            case 'Лабораторные занятия':
+                doc.tables[5].cell(3, 5).text = str(allTimeDictZ[key])
+            case 'Самостоятельная работа':
+                doc.tables[5].cell(3, 6).text = str(allTimeDictZ[key])
+            case 'Итого часов':
+                doc.tables[5].cell(3, 7).text = str(allTimeDictZ[key])
+    #________________________________________________________________
+    doc.paragraphs[158].runs[3].text = f"{dictInfO['Название']}"  # По дисциплине
+    doc.paragraphs[158].runs[3].underline = WD_UNDERLINE.SINGLE
+    startRow = 2
+    for key in dictInfO['Компетенции'].keys():
+        doc.tables[7].cell(startRow, 0).paragraphs[0].runs[0].text = key
+        startRow += 2
+    for _ in range(4 - len(dictInfO['Компетенции'])):
+        for _ in range(3):
+            __DeleteRow(doc.tables[7].rows[-1])
+    startRow = 2
+    for key in dictInfO['Компетенции'].keys():
+        doc.tables[8].cell(startRow, 0).paragraphs[0].runs[0].text = key
+        startRow += 2
+    for _ in range(4 - len(dictInfO['Компетенции'])):
+        for _ in range(3):
+            __DeleteRow(doc.tables[8].rows[-1])
+    # DELETE UNUSED
+    if 'Контрольная работа' in allTimeDictOch.keys():
+        __DeleteParagraph(doc.paragraphs[98])
+    else:
+        for _ in range(8):
+            __DeleteParagraph(doc.paragraphs[99])
+    if 'Курсовой проект' in allTimeDictOch.keys():
+        __DeleteParagraph(doc.paragraphs[87])
+    else:
+        for _ in range(8):
+            __DeleteParagraph(doc.paragraphs[88])
+    __DeleteParagraph(doc.paragraphs[58])
+    fullQualStr = ''
+    for key in dictInfO['Компетенции'].keys():
+        fullQualStr+= f"{key} - {dictInfO['Компетенции'][key]}\n"
+    doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
+    return doc
 
 def GetDisciplineList(jsonData):
     list = {}
@@ -324,3 +601,5 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     print(dictInf['Компетенции'])
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
     return dictInf
+
+# _________________________________________________________________________________________________________________________________________
