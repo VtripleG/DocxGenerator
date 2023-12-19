@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, Q
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.dialog = QFileDialog()
-        path = self.dialog.getOpenFileName()[0]
+        self.discListOch = dict()
+        self.discListZaoch = dict()
         self.searchLine = QLineEdit()
         self.searchLine.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.searchButton = QPushButton()
@@ -30,10 +30,6 @@ class MainWindow(QWidget):
         self.listLay = QHBoxLayout()
         self.leftLay.addWidget(self.leftListWidget)
         self.listLay.addLayout(self.leftLay)
-        self.fileData = parser.XmlToDict(path)
-        self.discList = parser.GetDisciplineList(self.fileData)
-        for key in self.discList.keys():
-            self.leftListWidget.addItem(self.discList[key])
         self.fileLay = QHBoxLayout()
         self.ochButton = QPushButton()
         self.ochButton.setText('Ochnoe')
@@ -52,6 +48,8 @@ class MainWindow(QWidget):
         self.leftListWidget.doubleClicked.connect(self.DoubleClickedOnLeftWidget)
         self.rightListWidget.doubleClicked.connect(self.DoubleClickedOnRightWidget)
         self.generateButton.clicked.connect(self.GenerateButtonClicked)
+        self.ochButton.clicked.connect(self.OchButtonClicked)
+        self.zaochButton.clicked.connect(self.ZaochButtonClicked)
 
     def DoubleClickedOnLeftWidget(self):
         self.rightListWidget.addItem(self.leftListWidget.itemFromIndex(self.leftListWidget.currentIndex()).text())
@@ -61,24 +59,43 @@ class MainWindow(QWidget):
         self.rightListWidget.takeItem(self.rightListWidget.currentRow())
     def GenerateButtonClicked(self):
         filePath = QFileDialog.getExistingDirectory()+'/'
-        print(filePath)
+        doc = parser.ReadDocxTemplate('./examples/RPD.docx')
         for index in range(self.rightListWidget.count()):
-            fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discList, self.rightListWidget.item(index).text()), self.fileData)
-            doc = parser.ReadDocxTemplate('./examples/RPD.docx')
-            # doc = parser.ReadDocxTemplate('./examples/RPD_backup.docx')
-            doc = parser.GenerateDocxOch(fullInf, doc)
-            parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
+            if self.rightListWidget.item(index).text() in self.discListZaoch.values():
+                pass
+            else:
+                fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListOch, self.rightListWidget.item(index).text()), self.fileDataOch)
+                doc = parser.GenerateDocxOch(fullInf, doc)
+                parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
         self.rightListWidget.clear()
 
     def SearchButtonClicked(self):
         self.leftListWidget.clear()
         if self.searchLine.text() == '':
-            for key in self.discList.keys():
-                self.leftListWidget.addItem(self.discList[key])
+            for key in self.discListOch.keys():
+                self.leftListWidget.addItem(self.discListOch[key])
             return
-        for key in self.discList.keys():
-            if self.searchLine.text().lower() in str(self.discList[key]).lower():
-                self.leftListWidget.addItem(self.discList[key])
+        for key in self.discListOch.keys():
+            if self.searchLine.text().lower() in str(self.discListOch[key]).lower():
+                self.leftListWidget.addItem(self.discListOch[key])
+
+    def OchButtonClicked(self):
+        self.leftListWidget.clear()
+        self.rightListWidget.clear()
+        self.discListZaoch.clear()
+        dialog = QFileDialog()
+        path = dialog.getOpenFileName()[0]
+        self.fileDataOch = parser.XmlToDict(path)
+        self.discListOch = parser.GetDisciplineList(self.fileDataOch)
+        for key in self.discListOch.keys():
+            self.leftListWidget.addItem(self.discListOch[key])
+
+    def ZaochButtonClicked(self):
+        dialog = QFileDialog()
+        path = dialog.getOpenFileName()[0]
+        self.fileDataZaoch = parser.XmlToDict(path)
+        self.discListZaoch = parser.GetDisciplineList(self.fileDataZaoch)
+
 
 if __name__ == "__main__":
     app = QApplication([])
