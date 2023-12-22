@@ -59,14 +59,16 @@ class MainWindow(QWidget):
         self.rightListWidget.takeItem(self.rightListWidget.currentRow())
     def GenerateButtonClicked(self):
         filePath = QFileDialog.getExistingDirectory()+'/'
-        doc = parser.ReadDocxTemplate('./examples/RPD.docx')
         for index in range(self.rightListWidget.count()):
+            doc = parser.ReadDocxTemplate('./examples/RPD.docx')
             if self.rightListWidget.item(index).text() in self.discListZaoch.values():
-                pass
+                fullInfOch = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListOch, self.rightListWidget.item(index).text()), self.fileDataOch)
+                fullInfZaoch = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListZaoch, self.rightListWidget.item(index).text()), self.fileDataZaoch)
+                doc = parser.GenerateDocxOchZ(fullInfOch, fullInfZaoch, doc)
             else:
                 fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListOch, self.rightListWidget.item(index).text()), self.fileDataOch)
                 doc = parser.GenerateDocxOch(fullInf, doc)
-                parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
+            parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
         self.rightListWidget.clear()
 
     def SearchButtonClicked(self):

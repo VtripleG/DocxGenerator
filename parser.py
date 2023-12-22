@@ -306,7 +306,7 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
             try:
                 allTimeDictOch['ЗЕТ'] += int(dictTimeOch.get(key)['ЗЕТ'])
             except:
-                allTimeDictOch['ЗЕТ'] = int(dictTimeOch.get(key)['ЗЕТ'])
+                allTimeDictOch['ЗЕТ'] = float(dictTimeOch.get(key)['ЗЕТ'])
         if 'Курсовой проект' in dictTimeOch.get(key).keys():
             allTimeDictOch['Курсовой проект'] = int(dictTimeOch.get(key)['Курсовой проект'])
         if 'Контрольная работа' in dictTimeOch.get(key).keys():
@@ -383,7 +383,7 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
             for _ in range(13):
                 __DeleteRow(doc.tables[3].rows[-1])
         case 4:
-            startCol = 8
+            startCol = 6
             allCol = 3
             for _ in range(3 * 13):
                 __DeleteRow(doc.tables[3].rows[-1])
@@ -457,7 +457,7 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
         if 'ЗЕТ' in dictTimeZ.get(key).keys():
             doc.tables[3].cell(12, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['ЗЕТ']
             doc.tables[3].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['ЗЕТ'])
-        startCol += 3
+        startCol += 2
     for key in allTimeDictZ:
         match key:
             case 'Лекционные занятия':
@@ -508,7 +508,8 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
 def GetDisciplineList(jsonData):
     list = {}
     for object in jsonData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыСтроки']:
-        list[object['@Код']] = object['@Дисциплина']
+        if '@КодКафедры' in object.keys() and object['@КодКафедры'] == '82':
+            list[object['@Код']] = object['@Дисциплина']
     return list
 
 
@@ -594,12 +595,15 @@ def __GetQualification(jsonData) -> str:
 def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf = {}
     dictInf['Название'] = disciplineName
+    print(dictInf['Название'])
     dictInf['Специальность'] = __GetSpecialization(plxData)
     dictInf['Профиль'] = __GetProfile(plxData)
     dictInf['Квалификация'] = __GetQualification(plxData)
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
-    print(dictInf['Компетенции'])
+    print(len(dictInf['Компетенции']))
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
+    print(len(dictInf['Часы']))
+    print('_________________________________________________________')
     return dictInf
 
 # _________________________________________________________________________________________________________________________________________
