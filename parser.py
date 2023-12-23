@@ -274,7 +274,7 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
             startCol = 8
             allCol = 3
             for _ in range(3 * 13):
-                __DeleteRow(doc.tables[2].rows[-1])
+                __DeleteRow(doc.tables[2].rows[0])
     allTimeDictOch = dict()
     for key in dictTimeOch.keys():
         if 'Практические занятия' in dictTimeOch.get(key).keys():
@@ -385,8 +385,12 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
         case 4:
             startCol = 6
             allCol = 3
-            for _ in range(3 * 13):
-                __DeleteRow(doc.tables[3].rows[-1])
+            for _ in range(13):
+                __DeleteRow(doc.tables[3].rows[0])
+            for _ in range(13):
+                __DeleteRow(doc.tables[3].rows[13])
+            for _ in range(13):
+                __DeleteRow(doc.tables[3].rows[0])
     allTimeDictZ = dict()
     for key in dictTimeZ.keys():
         if 'Практические занятия' in dictTimeZ.get(key).keys():
@@ -454,10 +458,10 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
         if 'Итого часов' in dictTimeZ.get(key).keys():
             doc.tables[3].cell(11, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['Итого часов']
             doc.tables[3].cell(11, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['Итого часов'])
-        if 'ЗЕТ' in dictTimeZ.get(key).keys():
-            doc.tables[3].cell(12, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['ЗЕТ']
-            doc.tables[3].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['ЗЕТ'])
-        startCol += 2
+        # if 'ЗЕТ' in dictTimeZ.get(key).keys():
+        #     doc.tables[3].cell(12, startCol).paragraphs[0].runs[0].text = dictTimeZ.get(key)['ЗЕТ']
+        #     doc.tables[3].cell(12, allCol).paragraphs[0].runs[0].text = str(allTimeDictZ['ЗЕТ'])
+        startCol += 2 + startCol % 3
     for key in allTimeDictZ:
         match key:
             case 'Лекционные занятия':
@@ -600,9 +604,10 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf['Профиль'] = __GetProfile(plxData)
     dictInf['Квалификация'] = __GetQualification(plxData)
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
-    print(len(dictInf['Компетенции']))
+    print('Компетенции: ' + str(len(dictInf['Компетенции'])))
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
-    print(len(dictInf['Часы']))
+    print('Часы: ' + str(len(dictInf['Часы'])))
+    pprint.pp(dictInf['Часы'])
     print('_________________________________________________________')
     return dictInf
 
