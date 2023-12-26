@@ -1,10 +1,5 @@
 import pprint
-import xml.etree.ElementTree as ET
-# from docx import Document
-# from docx.document import Document
 from docx.enum.text import WD_UNDERLINE
-# from docx.shared import Inches
-import json
 import xmltodict
 
 from docx.document import Document
@@ -65,7 +60,7 @@ def GenerateDocxOch(dictInf: dict, doc: Document):
     doc.paragraphs[18].runs[1].text = '2022-2023'  # Нормативный период обучения
     doc.paragraphs[18].runs[1].underline = WD_UNDERLINE.SINGLE
     doc.paragraphs[49].runs[1].text = f"{dictInf['Название']}"  # Дисциплина (модуль)
-    doc.paragraphs[49].runs[1   ].underline = WD_UNDERLINE.SINGLE
+    doc.paragraphs[49].runs[1].underline = WD_UNDERLINE.SINGLE
     doc.paragraphs[54].runs[1].text = f"{dictInf['Название']}"  # Процесс изучения дисциплины
     doc.paragraphs[54].runs[1].underline = WD_UNDERLINE.SINGLE
     startRow = 2
@@ -220,6 +215,59 @@ def GenerateDocxOch(dictInf: dict, doc: Document):
     for key in dictInf['Компетенции'].keys():
         fullQualStr+= f"{key} - {dictInf['Компетенции'][key]}\n"
     doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
+    return doc
+
+def NGG (dictInf: dict, doc: Document):
+    dictTime = dict()
+    dictTime = dictInf['Часы']
+    kursRabFlag = False
+    konRabFlag = False
+    for key in dictTime.keys():
+        semestrDict = dictTime[key]
+        if 'Курсовой проект' in semestrDict.keys():
+            kursRabFlag = True
+        if 'Контрольная работа' in semestrDict.keys():
+            konRabFlag = True
+
+    for object in doc.paragraphs:
+        if 'name' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('name', dictInf['Название'])
+        if 'spec' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('spec', dictInf['Специальность'])
+        if 'prof' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('prof', dictInf['Профиль'])
+        if 'qual' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('qual', dictInf['Квалификация'])
+        if 'compList' in object.text:
+            compStr = str()
+            for key in dictInf['Компетенции'].keys():
+                compStr += key + ' - ' + dictInf['Компетенции'][key] + '\n'
+            object.text = object.text.replace('compList', compStr)
+        if ('KPY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KPY', '')
+            if (kursRabFlag == False):
+                __DeleteParagraph(object)
+        if ('KPN' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KPN', '')
+            if (kursRabFlag == True):
+                __DeleteParagraph(object)
+        if ('KRY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KRY', '')
+            if (konRabFlag == False):
+                __DeleteParagraph(object)
+        if ('KRN' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KRN', '')
+            if (konRabFlag == True):
+                __DeleteParagraph(object)
+
     return doc
 
 def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
@@ -599,16 +647,23 @@ def __GetQualification(jsonData) -> str:
 def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf = {}
     dictInf['Название'] = disciplineName
-    print(dictInf['Название'])
+    # print(dictInf['Название'])
     dictInf['Специальность'] = __GetSpecialization(plxData)
     dictInf['Профиль'] = __GetProfile(plxData)
     dictInf['Квалификация'] = __GetQualification(plxData)
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
-    print('Компетенции: ' + str(len(dictInf['Компетенции'])))
+    # print('Компетенции: ' + str(len(dictInf['Компетенции'])))
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
-    print('Часы: ' + str(len(dictInf['Часы'])))
-    pprint.pp(dictInf['Часы'])
-    print('_________________________________________________________')
+    # print('Часы: ' + str(len(dictInf['Часы'])))
+    # pprint.pp(dictInf['Часы'])
+    # print('_________________________________________________________')
     return dictInf
 
 # _________________________________________________________________________________________________________________________________________
+
+doc = ReadDocxTemplate('./examples/RPD.docx')
+fileData = XmlToDict('./data/ochnoe.plx')
+discList = GetDisciplineList(fileData)
+dictInf = GetFullInf('Базы данных', KeyFromVal(discList, 'Базы данных'), fileData)
+doc = NGG(dictInf, doc)
+SaveDocx(doc, 'test', './files/')
