@@ -3,6 +3,7 @@ from docx.enum.text import WD_UNDERLINE
 import xmltodict
 
 from docx.document import Document
+
 try:
     document = Document()
 except TypeError:
@@ -39,10 +40,12 @@ def __DeleteTable(table):
 def __DeleteParagraph(paragraph):
     paragraph._element.getparent().remove(paragraph._element)
 
+
 def XmlToDict(fileName):
     with (open(fileName, 'r', encoding='utf16') as xml_file):
         xml_data = xmltodict.parse(xml_file.read())
     return xml_data
+
 
 def GenerateDocxOch(dictInf: dict, doc: Document):
     doc.tables[0].cell(0, 1).paragraphs[1].runs[1].text = 'ФИТКБ'  # Hаименование факультета
@@ -213,62 +216,250 @@ def GenerateDocxOch(dictInf: dict, doc: Document):
     __DeleteParagraph(doc.paragraphs[58])
     fullQualStr = ''
     for key in dictInf['Компетенции'].keys():
-        fullQualStr+= f"{key} - {dictInf['Компетенции'][key]}\n"
+        fullQualStr += f"{key} - {dictInf['Компетенции'][key]}\n"
     doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
     return doc
 
-def NGG (dictInf: dict, doc: Document):
-    dictTime = dict()
-    dictTime = dictInf['Часы']
-    kursRabFlag = False
-    konRabFlag = False
-    for key in dictTime.keys():
-        semestrDict = dictTime[key]
+
+def NGG(dictInfOO: dict, dictInfZO: dict, doc: Document):
+    dictTimeOO = dictInfOO['Часы']
+    kursRabFlagOO = False
+    konRabFlagOO = False
+    zed = int(0)
+    for key in dictTimeOO.keys():
+        semestrDict = dictTimeOO[key]
         if 'Курсовой проект' in semestrDict.keys():
-            kursRabFlag = True
+            kursRabFlagOO = True
         if 'Контрольная работа' in semestrDict.keys():
-            konRabFlag = True
+            konRabFlagOO = True
+        if 'ЗЕТ' in semestrDict.keys():
+            zed += int(semestrDict['ЗЕТ'])
 
     for object in doc.paragraphs:
         if 'name' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('name', dictInf['Название'])
+                run.text = run.text.replace('name', dictInfOO['Название'])
         if 'spec' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('spec', dictInf['Специальность'])
+                run.text = run.text.replace('spec', dictInfOO['Специальность'])
         if 'prof' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('prof', dictInf['Профиль'])
+                run.text = run.text.replace('prof', dictInfOO['Профиль'])
         if 'qual' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('qual', dictInf['Квалификация'])
+                run.text = run.text.replace('qual', dictInfOO['Квалификация'])
+        if 'zed' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('zed', str(zed))
         if 'compList' in object.text:
             compStr = str()
-            for key in dictInf['Компетенции'].keys():
-                compStr += key + ' - ' + dictInf['Компетенции'][key] + '\n'
+            for key in dictInfOO['Компетенции'].keys():
+                compStr += key + ' - ' + dictInfOO['Компетенции'][key] + '\n'
             object.text = object.text.replace('compList', compStr)
         if ('KPY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPY', '')
-            if (kursRabFlag == False):
+            if (kursRabFlagOO == False):
                 __DeleteParagraph(object)
         if ('KPN' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPN', '')
-            if (kursRabFlag == True):
+            if (kursRabFlagOO == True):
                 __DeleteParagraph(object)
         if ('KRY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KRY', '')
-            if (konRabFlag == False):
+            if (konRabFlagOO == False):
                 __DeleteParagraph(object)
         if ('KRN' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KRN', '')
-            if (konRabFlag == True):
+            if (konRabFlagOO == True):
                 __DeleteParagraph(object)
 
+    for _ in range(4 - len(dictInfOO['Компетенции'])):
+        for _ in range(3):
+            __DeleteRow(doc.tables[1].rows[-1])
+
+    compiKeysOO = list()
+    for key in dictInfOO['Компетенции'].keys():
+        compiKeysOO.append(key)
+    for cell in doc.tables[1].columns[0].cells:
+        if 'comp' in cell.text:
+            cell.text = cell.text.replace('comp', compiKeysOO[0])
+            compiKeysOO.pop(0)
+
+    for semestrKey in dictTimeOO.keys():
+        dictTimeOO[semestrKey]['Аудиторные занятия'] = str('0')
+        for timeKey in dictTimeOO[semestrKey].keys():
+            if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
+                dictTimeOO[semestrKey]['Аудиторные занятия'] = str(int(dictTimeOO[semestrKey]['Аудиторные занятия']) + int(dictTimeOO[semestrKey][timeKey]))
+
+    timeKeysOO = list()
+    for key in dictTimeOO.keys():
+        timeKeysOO.append(key)
+
+    dictAllTimeOO = dict()
+    dictAllTimeOO['Аудиторные занятия'] = str(0)
+    dictAllTimeOO['allTime'] = str(0)
+    for keySemestr in dictTimeOO.keys():
+        for timeKey in dictTimeOO[keySemestr].keys():
+            if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
+                dictAllTimeOO['Аудиторные занятия'] = str(int(dictAllTimeOO['Аудиторные занятия']) + int(dictTimeOO[keySemestr][timeKey]))
+                try:
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                except:
+                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+            if timeKey == 'Самостоятельная работа' or timeKey == 'Итого часов':
+                try:
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                except:
+                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+    dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
+
+
+
+    timeTableOO = doc.tables[2]
+    match len(dictTimeOO):
+        case 1:
+            for _ in range(3 * 13):
+                __DeleteRow(timeTableOO.rows[-1])
+        case 2:
+            for _ in range(13):
+                __DeleteRow(timeTableOO.rows[0])
+            for _ in range(2 * 13):
+                __DeleteRow(timeTableOO.rows[-1])
+        case 3:
+            for _ in range(2 * 13):
+                __DeleteRow(timeTableOO.rows[0])
+            for _ in range(13):
+                __DeleteRow(timeTableOO.rows[-1])
+        case 4:
+            for _ in range(3 * 13):
+                __DeleteRow(timeTableOO.rows[-1])
+
+    for colum in timeTableOO.columns:
+        for cell in colum.cells:
+            if 'adTimeAll' in cell.text:
+                if 'Аудиторные занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('adTimeAll', dictAllTimeOO['Аудиторные занятия'])
+                else:
+                    cell.text = ''
+            if 'lcTimeAll' in cell.text:
+                if 'Лекционные занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('lcTimeAll', dictAllTimeOO['Лекционные занятия'])
+                else:
+                    cell.text = ''
+            if 'prctTimeAll' in cell.text:
+                if 'Практические занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('prctTimeAll', dictAllTimeOO['Практические занятия'])
+                else:
+                    cell.text = ''
+            if 'lbTimeAll' in cell.text:
+                if 'Лабораторные занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('lbTimeAll', dictAllTimeOO['Лабораторные занятия'])
+                else:
+                    cell.text = ''
+            if 'smTimeAll' in cell.text:
+                if 'Самостоятельная работа' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('smTimeAll', dictAllTimeOO['Самостоятельная работа'])
+                else:
+                    cell.text = ''
+            if 'allTime' in cell.text:
+                if 'Итого часов' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('allTime', dictAllTimeOO['Итого часов'])
+                else:
+                    cell.text = ''
+            if 'allZed' in cell.text:
+                cell.text = str(zed)
+            if 'semestr' in cell.text:
+                cell.text = cell.text.replace('semestr', str(timeKeysOO[0]))
+            if 'audTime' in cell.text:
+                if 'Аудиторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('audTime', dictTimeOO[timeKeysOO[0]]['Аудиторные занятия'])
+                else:
+                    cell.text = ''
+            if 'practTime' in cell.text:
+                if 'Практические занятия' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('practTime', dictTimeOO[timeKeysOO[0]]['Практические занятия'])
+                else:
+                    cell.text = ''
+            if 'labTime' in cell.text:
+                if 'Лабораторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('labTime', dictTimeOO[timeKeysOO[0]]['Лабораторные занятия'])
+                else:
+                    cell.text = ''
+            if 'lectTime' in cell.text:
+                if 'Лекционные занятия' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('lectTime', dictTimeOO[timeKeysOO[0]]['Лекционные занятия'])
+                else:
+                    cell.text = ''
+            if 'samTime' in cell.text:
+                if 'Самостоятельная работа' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('samTime', dictTimeOO[timeKeysOO[0]]['Самостоятельная работа'])
+                else:
+                    cell.text = ''
+            if 'kurs' in cell.text:
+                if 'Курсовой проект' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = '+'
+                else:
+                    cell.text = '-'
+            if 'kr' in cell.text:
+                if 'Контрольная работа' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = '+'
+                else:
+                    cell.text = '-'
+            if 'att' in cell.text:
+                if 'Зачет' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('att', 'Зачет')
+                elif 'Зачет с оценкой' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('att', 'Зачет с оценкой')
+                elif 'Экзамен' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('att', 'Экзамен')
+            if 'fullTime' in cell.text:
+                if 'Итого часов' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullTime', dictTimeOO[timeKeysOO[0]]['Итого часов'])
+                else:
+                    cell.text = ''
+            if 'fullZed' in cell.text:
+                if 'ЗЕТ' in dictTimeOO[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullZed', dictTimeOO[timeKeysOO[0]]['ЗЕТ'])
+                else:
+                    cell.text = ''
+                timeKeysOO.pop(0)
+
+    allTimeTableOO = doc.tables[4]
+    for colum in allTimeTableOO.columns:
+        for cell in colum.cells:
+            if 'allLect' in cell.text:
+                if 'Лекционные занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('allLect', dictAllTimeOO['Лекционные занятия'])
+                else:
+                    cell.text = ''
+            if 'allPract' in cell.text:
+                if 'Практические занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('allPract', dictAllTimeOO['Практические занятия'])
+                else:
+                    cell.text = ''
+            if 'allLab' in cell.text:
+                if 'Лабораторные занятия' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('allLab', dictAllTimeOO['Лабораторные занятия'])
+                else:
+                    cell.text = ''
+            if 'allSam' in cell.text:
+                if 'Самостоятельная работа' in dictAllTimeOO.keys():
+                    cell.text = cell.text.replace('allSam', dictAllTimeOO['Самостоятельная работа'])
+                else:
+                    cell.text = ''
+            if 'allTime' in cell.text:
+                if 'Аудиторные занятия' in dictAllTimeOO.keys():
+                    if 'Самостоятельная работа' in dictAllTimeOO.keys():
+                        cell.text = cell.text.replace('allTime', str(int(dictAllTimeOO['Аудиторные занятия']) + int(dictAllTimeOO['Самостоятельная работа'])))
+                    else:
+                        cell.text = ''
+
     return doc
+
 
 def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
     doc.tables[0].cell(0, 1).paragraphs[1].runs[1].text = 'ФИТКБ'  # Hаименование факультета
@@ -522,7 +713,7 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
                 doc.tables[5].cell(3, 6).text = str(allTimeDictZ[key])
             case 'Итого часов':
                 doc.tables[5].cell(3, 7).text = str(allTimeDictZ[key])
-    #________________________________________________________________
+    # ________________________________________________________________
     doc.paragraphs[158].runs[3].text = f"{dictInfO['Название']}"  # По дисциплине
     doc.paragraphs[158].runs[3].underline = WD_UNDERLINE.SINGLE
     startRow = 2
@@ -553,9 +744,10 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
     __DeleteParagraph(doc.paragraphs[58])
     fullQualStr = ''
     for key in dictInfO['Компетенции'].keys():
-        fullQualStr+= f"{key} - {dictInfO['Компетенции'][key]}\n"
+        fullQualStr += f"{key} - {dictInfO['Компетенции'][key]}\n"
     doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
     return doc
+
 
 def GetDisciplineList(jsonData):
     list = {}
@@ -659,11 +851,12 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     # print('_________________________________________________________')
     return dictInf
 
+
 # _________________________________________________________________________________________________________________________________________
 
 doc = ReadDocxTemplate('./examples/RPD.docx')
 fileData = XmlToDict('./data/ochnoe.plx')
 discList = GetDisciplineList(fileData)
 dictInf = GetFullInf('Базы данных', KeyFromVal(discList, 'Базы данных'), fileData)
-doc = NGG(dictInf, doc)
+doc = NGG(dictInf, dictInf, doc)
 SaveDocx(doc, 'test', './files/')
