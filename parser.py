@@ -49,17 +49,42 @@ def XmlToDict(fileName):
 
 def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
     dictTimeOO = dictInfOO['Часы']
+
     kursRabFlagOO = False
+    kursPrFlagOO = False
     konRabFlagOO = False
-    zed = int(0)
+
+    listKursRabOO = list()
+    listKursPrOO = list()
+
+    zedOO = int(0)
+
     for key in dictTimeOO.keys():
         semestrDict = dictTimeOO[key]
-        if 'Курсовой проект' in semestrDict.keys():
+        if 'Курсовая работа' in semestrDict.keys():
             kursRabFlagOO = True
+            listKursRabOO.append(key)
+        if 'Курсовой проект' in semestrDict.keys():
+            kursPrFlagOO = True
+            listKursPrOO.append(key)
         if 'Контрольная работа' in semestrDict.keys():
             konRabFlagOO = True
         if 'ЗЕТ' in semestrDict.keys():
-            zed += int(semestrDict['ЗЕТ'])
+            zedOO += int(semestrDict['ЗЕТ'])
+
+    stringKursRabOO = str()
+    if len(listKursRabOO) != 0:
+        stringKursRabOO = f"{listKursRabOO[0]} семестре для очной формы обучения"
+    if len(listKursRabOO) > 1:
+        for index in range(1, len(listKursRabOO)):
+            stringKursRabOO += f", в {listKursRabOO[index]} семестре для очной формы обучения"
+
+    stringKursPrOO = str()
+    if len(listKursPrOO) != 0:
+        stringKursPrOO = f"{listKursPrOO[0]} семестре для очной формы обучения"
+    if len(listKursPrOO) > 1:
+        for index in range(1, len(listKursPrOO)):
+            stringKursPrOO += f", в {listKursPrOO[index]} семестре для очной формы обучения"
 
     for object in doc.paragraphs:
         if 'name' in object.text:
@@ -99,21 +124,37 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
                         run.clear()
         if 'zed' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('zed', str(zed))
+                run.text = run.text.replace('zed', str(zedOO))
         if 'compList' in object.text:
             compStr = str()
             for key in dictInfOO['Компетенции'].keys():
                 compStr += key + ' - ' + dictInfOO['Компетенции'][key] + '\n'
             object.text = object.text.replace('compList', compStr)
+        if 'kursPList' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('kursPList', stringKursPrOO)
+        if 'kursRList' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('kursRList', stringKursRabOO)
+        if ('KPrY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KPrY', '')
+            if (kursPrFlagOO == False):
+                __DeleteParagraph(object)
+        if ('KRabY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KRabY', '')
+            if (kursRabFlagOO == False):
+                __DeleteParagraph(object)
         if ('KPY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPY', '')
-            if (kursRabFlagOO == False):
+            if (kursPrFlagOO == False and kursRabFlagOO == False):
                 __DeleteParagraph(object)
         if ('KPN' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPN', '')
-            if (kursRabFlagOO == True):
+            if (kursPrFlagOO == True or kursRabFlagOO == True):
                 __DeleteParagraph(object)
         if ('KRY' in object.text):
             for run in object.runs:
@@ -170,7 +211,10 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
                     dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
                 except:
                     dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
-    dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
+    if 'Самостоятельная работа' in dictAllTimeOO.keys():
+        dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
+    else:
+        dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия']
 
     timeTableOO = doc.tables[2]
     match len(dictTimeOO):
@@ -224,7 +268,7 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
                 else:
                     cell.text = ''
             if 'allZed' in cell.text:
-                cell.text = str(zed)
+                cell.text = str(zedOO)
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysOO[0]))
             if 'audTime' in cell.text:
@@ -345,33 +389,87 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
 def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Document:
     dictTimeOO = dictInfOO['Часы']
     dictTimeZO = dictInfZO['Часы']
+
     kursRabFlagOO = False
+    kursPrFlagOO = False
     konRabFlagOO = False
-    listKursOO = list()
-    listKursZO = list()
-    zed = int(0)
+
+    kursRabFlagZO = False
+    kursPrFlagZO = False
+    konRabFlagZO = False
+
+    listKursRabOO = list()
+    listKursRabZO = list()
+    listKursPrOO = list()
+    listKursPrZO = list()
+
+    zedOO = int(0)
+    zedZO = int(0)
+
     for key in dictTimeOO.keys():
         semestrDict = dictTimeOO[key]
-        if 'Курсовой проект' or 'Курсовая работа' in semestrDict.keys():
+        if 'Курсовая работа' in semestrDict.keys():
             kursRabFlagOO = True
-            listKursOO.append(key)
+            listKursRabOO.append(key)
+        if 'Курсовой проект' in semestrDict.keys():
+            kursPrFlagOO = True
+            listKursPrOO.append(key)
         if 'Контрольная работа' in semestrDict.keys():
             konRabFlagOO = True
         if 'ЗЕТ' in semestrDict.keys():
-            zed += int(semestrDict['ЗЕТ'])
+            zedOO += int(semestrDict['ЗЕТ'])
 
     for key in dictTimeZO.keys():
         semestrDict = dictTimeZO[key]
-        if 'Курсовой проект' or 'Курсовая работа' in semestrDict.keys():
-            listKursZO.append(key)
+        if 'Курсовая работа' in semestrDict.keys():
+            kursRabFlagZO = True
+            listKursRabOO.append(key)
+        if 'Курсовой проект' in semestrDict.keys():
+            kursPrFlagZO = True
+            listKursPrZO.append(key)
+        if 'Контрольная работа' in semestrDict.keys():
+            konRabFlagZO = True
+        if 'ЗЕТ' in semestrDict.keys():
+            zedZO += int(semestrDict['ЗЕТ'])
 
-    kursListString = f"{listKursOO[0]} семестре для очной формы обучения"
-    if listKursOO.count() != 0:
-        for index in range(1, listKursOO.count()):
-            kursListString+= f", в {listKursOO[index]} семестре для очной формы обучения"
-    if listKursZO.count() != 0:
-        for index in range(0, listKursZO.count()):
-            kursListString+= f", в {listKursZO[index]} семестре для заочной формы обучения"
+    stringKursRabOO = str()
+    if len(listKursRabOO) != 0:
+        stringKursRabOO = f"{listKursRabOO[0]} семестре для очной формы обучения"
+    if len(listKursRabOO) > 1:
+        for index in range(1, len(listKursRabOO)):
+            stringKursRabOO += f", в {listKursRabOO[index]} семестре для очной формы обучения"
+
+    stringKursRabZO = str()
+    if len(listKursRabZO) != 0:
+        if stringKursRabZO != '':
+            for index in range(0, len(listKursRabZO)):
+                stringKursRabZO += f", в {listKursRabZO[index]} семестре для заочной формы обучения"
+        else:
+            stringKursRabZO = f"{listKursRabZO[0]} семестре для заочной формы обучения"
+            if len(listKursRabZO) > 1:
+                for index in range(1, len(listKursRabZO)):
+                    stringKursRabZO += f", в {listKursRabZO[index]} семестре для заочной формы обучения"
+
+    stringKursRab = stringKursRabOO + stringKursRabZO
+
+    stringKursPrOO = str()
+    if len(listKursPrOO) != 0:
+        stringKursPrOO = f"{listKursPrOO[0]} семестре для очной формы обучения"
+    if len(listKursPrOO) > 1:
+        for index in range(1, len(listKursPrOO)):
+            stringKursPrOO += f", в {listKursPrOO[index]} семестре для очной формы обучения"
+    stringKursPrZO = str()
+    if len(listKursPrZO) != 0:
+        if stringKursPrOO != '':
+            for index in range(0, len(listKursPrZO)):
+                stringKursPrZO += f", в {listKursPrZO[index]} семестре для заочной формы обучения"
+        else:
+            stringKursPrZO = f"{listKursPrZO[0]} семестре для заочной формы обучения"
+            if len(listKursPrZO) > 1:
+                for index in range(1, len(listKursPrZO)):
+                    stringKursPrZO += f", в {listKursPrZO[index]} семестре для заочной формы обучения"
+
+    stringKursPr = stringKursPrOO + stringKursPrZO
 
     for object in doc.paragraphs:
         if 'name' in object.text:
@@ -411,31 +509,47 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                         run.clear()
         if 'zed' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('zed', str(zed))
+                run.text = run.text.replace('zed', f"{zedOO} / {zedZO}")
         if 'compList' in object.text:
             compStr = str()
             for key in dictInfOO['Компетенции'].keys():
                 compStr += key + ' - ' + dictInfOO['Компетенции'][key] + '\n'
             object.text = object.text.replace('compList', compStr)
+        if 'kursPList' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('kursPList', stringKursPr)
+        if 'kursRList' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('kursRList', stringKursRab)
+        if ('KPrY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KPrY', '')
+            if (kursPrFlagOO == False and kursPrFlagZO == False):
+                __DeleteParagraph(object)
+        if ('KRabY' in object.text):
+            for run in object.runs:
+                run.text = run.text.replace('KRabY', '')
+            if (kursRabFlagZO == False and kursRabFlagOO == False):
+                __DeleteParagraph(object)
         if ('KPY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPY', '')
-            if (kursRabFlagOO == False):
+            if (kursPrFlagOO == False and kursPrFlagZO == False and kursRabFlagOO == False and kursRabFlagZO == False):
                 __DeleteParagraph(object)
         if ('KPN' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPN', '')
-            if (kursRabFlagOO == True):
+            if (kursPrFlagOO == True or kursPrFlagZO == True or kursRabFlagOO == True):
                 __DeleteParagraph(object)
         if ('KRY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KRY', '')
-            if (konRabFlagOO == False):
+            if (konRabFlagOO == False and konRabFlagZO == False):
                 __DeleteParagraph(object)
         if ('KRN' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KRN', '')
-            if (konRabFlagOO == True):
+            if (konRabFlagOO == True or konRabFlagZO == True):
                 __DeleteParagraph(object)
 
         if 'timeTableZ' in object.text:
@@ -483,7 +597,10 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                     dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
                 except:
                     dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
-    dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
+    if 'Самостоятельная работа' in dictAllTimeOO.keys():
+        dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
+    else:
+        dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия']
 
     timeTableOO = doc.tables[2]
     match len(dictTimeOO):
@@ -537,7 +654,7 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                 else:
                     cell.text = ''
             if 'allZed' in cell.text:
-                cell.text = str(zed)
+                cell.text = str(zedOO)
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysOO[0]))
             if 'audTime' in cell.text:
@@ -566,7 +683,7 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                 else:
                     cell.text = ''
             if 'kurs' in cell.text:
-                if 'Курсовой проект' in dictTimeOO[timeKeysOO[0]].keys():
+                if ('Курсовой проект' or 'Курсовая работа') in dictTimeOO[timeKeysOO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
@@ -653,7 +770,10 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                     dictAllTimeZO[timeKey] = str(int(dictAllTimeZO[timeKey]) + int(dictTimeZO[keySemestr][timeKey]))
                 except:
                     dictAllTimeZO[timeKey] = dictTimeZO[keySemestr][timeKey]
-    dictAllTimeZO['allTime'] = dictAllTimeZO['Аудиторные занятия'] + dictAllTimeZO['Самостоятельная работа']
+    if 'Самостоятельная работа' in dictAllTimeZO.keys():
+        dictAllTimeZO['allTime'] = dictAllTimeZO['Аудиторные занятия'] + dictAllTimeZO['Самостоятельная работа']
+    else:
+        dictAllTimeZO['allTime'] = dictAllTimeZO['Аудиторные занятия']
 
     timeTableZO = doc.tables[3]
     match len(dictTimeZO):
@@ -707,7 +827,7 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                 else:
                     cell.text = ''
             if 'allZed' in cell.text:
-                cell.text = str(zed)
+                cell.text = str(zedZO)
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysZO[0]))
             if 'audTime' in cell.text:
@@ -736,7 +856,7 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                 else:
                     cell.text = ''
             if 'kurs' in cell.text:
-                if 'Курсовой проект' in dictTimeZO[timeKeysZO[0]].keys():
+                if ('Курсовой проект' or 'Курсовая работа') in dictTimeZO[timeKeysZO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
@@ -847,9 +967,11 @@ def __SearchHoursBySemesterNumber(semesterNumber: int, disciplineCode: str, plxD
     hoursList = []
     for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
         if (object['@КодОбъекта'] == disciplineCode) and (
-                int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber):
-            codeList.append(object['@КодВидаРаботы'])
-            hoursList.append(object['@Количество'])
+                int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber or int(
+            object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == semesterNumber):
+            if codeList.__contains__(object['@КодВидаРаботы']) == False:
+                codeList.append(object['@КодВидаРаботы'])
+                hoursList.append(object['@Количество'])
     nameList = []
     dict = {}
     for key in codeList:
@@ -866,8 +988,12 @@ def __SearchHours(disciplineCode: str, plxData: dict) -> dict:
     dict = {}
     semesterNumberList = []
     for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+
         if object['@КодОбъекта'] == disciplineCode:
-            num = int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1
+            if object['@Семестр'] != '0':
+                num = int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1
+            else:
+                num = int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2)
             if semesterNumberList.__contains__(num) == False:
                 semesterNumberList.append(num)
     for i in range(semesterNumberList.__len__()):
@@ -943,24 +1069,26 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
 
     return dictInf
 
+# _________________________________________________________________________________________________________________________________________Test code
 
-# _________________________________________________________________________________________________________________________________________
+# doc = ReadDocxTemplate('./examples/RPD.docx')
+# fileDataOO = XmlToDict('./data/ochnoe.plx')
+# discListOO = GetDisciplineList(fileDataOO)
+# dictInfOO = GetFullInf('Информатика', KeyFromVal(discListOO, 'Информатика'), fileDataOO)
+#
+# fileDataZO = XmlToDict('./data/zaoch.plx')
+# discListZO = GetDisciplineList(fileDataZO)
+# dictInfZO = GetFullInf('Информатика', KeyFromVal(discListZO, 'Информатика'), fileDataZO)
+#
+# doc = GenerateDocxOchZ(dictInfOO, dictInfZO, doc)
+# SaveDocx(doc, 'test_ZO', './files/')
+#
+# doc = ReadDocxTemplate('./examples/RPD.docx')
+# fileData = XmlToDict('./data/ochnoe.plx')
+# discList = GetDisciplineList(fileData)
+# dictInf = GetFullInf('Информатика', KeyFromVal(discList, 'Информатика'), fileData)
+# doc = GenerateDocxOch(dictInf, doc)
+# SaveDocx(doc, 'test_O', './files/')
 
-doc = ReadDocxTemplate('./examples/RPD.docx')
-fileDataOO = XmlToDict('./data/ochnoe.plx')
-discListOO = GetDisciplineList(fileDataOO)
-dictInfOO = GetFullInf('Информатика', KeyFromVal(discListOO, 'Информатика'), fileDataOO)
-
-fileDataZO = XmlToDict('./data/zaoch.plx')
-discListZO = GetDisciplineList(fileDataZO)
-dictInfZO = GetFullInf('Информатика', KeyFromVal(discListZO, 'Информатика'), fileDataZO)
-
-doc = GenerateDocxOchZ(dictInfOO, dictInfZO, doc)
-SaveDocx(doc, 'testOZ', './files/')
-
-doc = ReadDocxTemplate('./examples/RPD.docx')
-fileData = XmlToDict('./data/ochnoe.plx')
-discList = GetDisciplineList(fileData)
-dictInf = GetFullInf('Информатика', KeyFromVal(discList, 'Информатика'), fileData)
-doc = GenerateDocxOch(dictInf, doc)
-SaveDocx(doc, 'testO', './files/')
+# Базы данных
+# Информатика

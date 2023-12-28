@@ -704,3 +704,18 @@ def GenerateDocxOchZ(dictInfO: dict, dictInfZ: dict, doc: Document):
         fullQualStr += f"{key} - {dictInfO['Компетенции'][key]}\n"
     doc.paragraphs[55].text = f"{doc.paragraphs[55].text}\n {fullQualStr}"
     return doc
+
+    stringKursPrOO = str()
+    if len(listKursPrOO) != 0:
+        stringKursPrOO = f"{listKursPrOO[0]} семестре для очной формы обучения"
+    if len(listKursPrOO) > 1:
+        for index in range(1, len(listKursPrOO)):
+            stringKursPrOO += f", в {listKursPrOO[index]} семестре для очной формы обучения"
+    stringKursPrZO = str()
+    if len(listKursPrZO) != 0:
+        stringKursPrZO = f"{listKursPrZO[0]} семестре для очной формы обучения"
+    if len(listKursPrZO) > 1:
+        for index in range(1, len(listKursPrZO)):
+            stringKursPrZO += f", в {listKursPrZO[index]} семестре для очной формы обучения"
+
+    stringKursPr = stringKursPrOO + stringKursPrZO

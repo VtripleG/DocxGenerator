@@ -1,7 +1,8 @@
 import sys
 import parser
 from docx import Document
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout, QFileDialog, QLineEdit, QSizePolicy
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout, QFileDialog, \
+    QLineEdit, QSizePolicy, QMessageBox
 
 
 
@@ -53,22 +54,42 @@ class MainWindow(QWidget):
     def DoubleClickedOnLeftWidget(self):
         self.rightListWidget.addItem(self.leftListWidget.itemFromIndex(self.leftListWidget.currentIndex()).text())
         self.leftListWidget.takeItem(self.leftListWidget.currentRow())
+
     def DoubleClickedOnRightWidget(self):
         self.leftListWidget.addItem(self.rightListWidget.itemFromIndex(self.rightListWidget.currentIndex()).text())
         self.rightListWidget.takeItem(self.rightListWidget.currentRow())
+
     def GenerateButtonClicked(self):
-        filePath = QFileDialog.getExistingDirectory()+'/'
+        filePath = QFileDialog.getExistingDirectory()
+        if filePath == '':
+            return
+        filePath += '/'
+        self.setEnabled(False)
         for index in range(self.rightListWidget.count()):
-            doc = parser.ReadDocxTemplate('./examples/RPD.docx')
-            if self.rightListWidget.item(index).text() in self.discListZaoch.values():
-                fullInfOch = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListOch, self.rightListWidget.item(index).text()), self.fileDataOch)
-                fullInfZaoch = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListZaoch, self.rightListWidget.item(index).text()), self.fileDataZaoch)
-                doc = parser.GenerateDocxOchZ(fullInfOch, fullInfZaoch, doc)
-            else:
-                fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(), parser.KeyFromVal(self.discListOch, self.rightListWidget.item(index).text()), self.fileDataOch)
-                doc = parser.GenerateDocxOch(fullInf, doc)
-            parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
+            try:
+                doc = parser.ReadDocxTemplate('./examples/RPD.docx')
+                if self.rightListWidget.item(index).text() in self.discListZaoch.values():
+                    fullInfOch = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                                                   parser.KeyFromVal(self.discListOch,
+                                                                     self.rightListWidget.item(index).text()),
+                                                   self.fileDataOch)
+                    fullInfZaoch = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                                                     parser.KeyFromVal(self.discListZaoch,
+                                                                       self.rightListWidget.item(index).text()),
+                                                     self.fileDataZaoch)
+                    doc = parser.GenerateDocxOchZ(fullInfOch, fullInfZaoch, doc)
+                else:
+                    fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                                                parser.KeyFromVal(self.discListOch,
+                                                                  self.rightListWidget.item(index).text()),
+                                                self.fileDataOch)
+                    doc = parser.GenerateDocxOch(fullInf, doc)
+                parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
+            except:
+                QMessageBox.critical(self, 'Generate docx file ERROR',
+                                     f"An ERROR occurred during file generation {self.rightListWidget.item(index).text()}")
         self.rightListWidget.clear()
+        self.setEnabled(True)
 
     def SearchButtonClicked(self):
         self.leftListWidget.clear()
@@ -86,6 +107,8 @@ class MainWindow(QWidget):
         self.discListZaoch.clear()
         dialog = QFileDialog()
         path = dialog.getOpenFileName()[0]
+        if path == '':
+            return
         self.fileDataOch = parser.XmlToDict(path)
         self.discListOch = parser.GetDisciplineList(self.fileDataOch)
         for key in self.discListOch.keys():
@@ -94,6 +117,8 @@ class MainWindow(QWidget):
     def ZaochButtonClicked(self):
         dialog = QFileDialog()
         path = dialog.getOpenFileName()[0]
+        if path == '':
+            return
         self.fileDataZaoch = parser.XmlToDict(path)
         self.discListZaoch = parser.GetDisciplineList(self.fileDataZaoch)
 
