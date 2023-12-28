@@ -102,13 +102,13 @@ class MainWindow(QWidget):
                 self.leftListWidget.addItem(self.discListOch[key])
 
     def OchButtonClicked(self):
-        self.leftListWidget.clear()
-        self.rightListWidget.clear()
-        self.discListZaoch.clear()
         dialog = QFileDialog()
         path = dialog.getOpenFileName()[0]
         if path == '':
             return
+        self.leftListWidget.clear()
+        self.rightListWidget.clear()
+        self.discListZaoch.clear()
         self.fileDataOch = parser.XmlToDict(path)
         self.discListOch = parser.GetDisciplineList(self.fileDataOch)
         for key in self.discListOch.keys():
