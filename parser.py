@@ -966,9 +966,9 @@ def __SearchHoursBySemesterNumber(semesterNumber: int, disciplineCode: str, plxD
     codeList = []
     hoursList = []
     for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
-        if (object['@КодОбъекта'] == disciplineCode) and (
-                int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber or int(
-            object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == semesterNumber):
+        if (object['@КодТипаЧасов'] != '3') and (object['@КодОбъекта'] == disciplineCode) and (
+                (int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber) or (
+                int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == semesterNumber)):
             if codeList.__contains__(object['@КодВидаРаботы']) == False:
                 codeList.append(object['@КодВидаРаботы'])
                 hoursList.append(object['@Количество'])
@@ -978,6 +978,8 @@ def __SearchHoursBySemesterNumber(semesterNumber: int, disciplineCode: str, plxD
         for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['СправочникВидыРабот']:
             if object['@Код'] == key:
                 nameList.append(object['@Название'])
+    # print(hoursList)
+    # print(nameList)
     for i in range(nameList.__len__()):
         dict[nameList[i]] = hoursList[i]
 
@@ -1063,6 +1065,7 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf['Квалификация'] = __GetQualification(plxData)
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
+    pprint.pp(dictInf['Часы'])
     dictInf['B1'] = __GetB1(disciplineCode, plxData)
     dictInf['startYear'] = __GetStartYear(plxData)
     dictInf['srok'] = __GetSrok(plxData)
@@ -1089,6 +1092,10 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
 # dictInf = GetFullInf('Информатика', KeyFromVal(discList, 'Информатика'), fileData)
 # doc = GenerateDocxOch(dictInf, doc)
 # SaveDocx(doc, 'test_O', './files/')
+
+# dictInf = XmlToDict('./data/zaoch.plx')
+# with open('./data/zaochnoe.json', 'w', encoding='utf8') as file:
+#     json.dump(dictInf, file, ensure_ascii=False, indent=4)
 
 # Базы данных
 # Информатика
