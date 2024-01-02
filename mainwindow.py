@@ -3,6 +3,7 @@ import parser
 from docx import Document
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout, QFileDialog, \
     QLineEdit, QSizePolicy, QMessageBox
+from PyQt5.QtCore import Qt
 
 
 
@@ -65,6 +66,7 @@ class MainWindow(QWidget):
             return
         filePath += '/'
         self.setEnabled(False)
+        # self.setCursor(Qt.WaitCursor)
         for index in range(self.rightListWidget.count()):
             try:
                 doc = parser.ReadDocxTemplate('./examples/RPD.docx')
@@ -89,6 +91,7 @@ class MainWindow(QWidget):
                 QMessageBox.critical(self, 'Generate docx file ERROR',
                                      f"An ERROR occurred during file generation {self.rightListWidget.item(index).text()}")
         self.rightListWidget.clear()
+        QMessageBox.information(self, 'Complite', 'Generate complite!')
         self.setEnabled(True)
 
     def SearchButtonClicked(self):
@@ -103,7 +106,7 @@ class MainWindow(QWidget):
 
     def OchButtonClicked(self):
         dialog = QFileDialog()
-        path = dialog.getOpenFileName()[0]
+        path = dialog.getOpenFileName(filter="plx(*.plx)")[0]
         if path == '':
             return
         self.leftListWidget.clear()
@@ -116,7 +119,7 @@ class MainWindow(QWidget):
 
     def ZaochButtonClicked(self):
         dialog = QFileDialog()
-        path = dialog.getOpenFileName()[0]
+        path = dialog.getOpenFileName(filter="plx(*.plx)")[0]
         if path == '':
             return
         self.fileDataZaoch = parser.XmlToDict(path)
