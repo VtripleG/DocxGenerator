@@ -47,8 +47,8 @@ def XmlToDict(fileName):
     return xml_data
 
 
-def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
-    dictTimeOO = dictInfOO['Часы']
+def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
+    dictTimeOchnoe = dictFullInfOchnoe['Часы']
 
     kursRabFlagOO = False
     kursPrFlagOO = False
@@ -59,8 +59,8 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
 
     zedOO = int(0)
 
-    for key in dictTimeOO.keys():
-        semestrDict = dictTimeOO[key]
+    for key in dictTimeOchnoe.keys():
+        semestrDict = dictTimeOchnoe[key]
         if 'Курсовая работа' in semestrDict.keys():
             kursRabFlagOO = True
             listKursRabOO.append(key)
@@ -89,36 +89,36 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
     for object in doc.paragraphs:
         if 'name' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('name', dictInfOO['Название'])
+                run.text = run.text.replace('name', dictFullInfOchnoe['Название'])
         if 'spec' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('spec', dictInfOO['Специальность'])
+                run.text = run.text.replace('spec', dictFullInfOchnoe['Специальность'])
         if 'prof' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('prof', dictInfOO['Профиль'])
+                run.text = run.text.replace('prof', dictFullInfOchnoe['Профиль'])
         if 'qual' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('qual', dictInfOO['Квалификация'])
+                run.text = run.text.replace('qual', dictFullInfOchnoe['Квалификация'])
         if 'period' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('period', dictInfOO['srok'])
+                run.text = run.text.replace('period', dictFullInfOchnoe['srok'])
         if 'form' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('form', 'Очная')
         if 'startYear' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('startYear', dictInfOO['startYear'])
+                run.text = run.text.replace('startYear', dictFullInfOchnoe['startYear'])
         if 'B1O' in object.text:
             for run in object.runs:
                 if 'B1O' in run.text:
-                    if dictInfOO['B1'][3] == 'О':
+                    if dictFullInfOchnoe['B1'][3] == 'О':
                         run.text = run.text.replace('B1O', '')
                     else:
                         run.clear()
         if 'B1B' in object.text:
             for run in object.runs:
                 if 'B1B' in run.text:
-                    if dictInfOO['B1'][3] != 'О':
+                    if dictFullInfOchnoe['B1'][3] != 'О':
                         run.text = run.text.replace('B1B)', '')
                     else:
                         run.clear()
@@ -127,8 +127,8 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
                 run.text = run.text.replace('zed', str(zedOO))
         if 'compList' in object.text:
             compStr = str()
-            for key in dictInfOO['Компетенции'].keys():
-                compStr += key + ' - ' + dictInfOO['Компетенции'][key] + '\n'
+            for key in dictFullInfOchnoe['Компетенции'].keys():
+                compStr += key + ' - ' + dictFullInfOchnoe['Компетенции'][key] + '\n'
             object.text = object.text.replace('compList', compStr)
         if 'kursPList' in object.text:
             for run in object.runs:
@@ -171,53 +171,53 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
         if 'allTimeTableZ' in object.text:
             __DeleteParagraph(object)
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[1].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[1].columns[0].cells:
         if 'comp' in cell.text:
             cell.text = cell.text.replace('comp', compiKeysOO[0])
             compiKeysOO.pop(0)
 
-    for semestrKey in dictTimeOO.keys():
-        dictTimeOO[semestrKey]['Аудиторные занятия'] = str('0')
-        for timeKey in dictTimeOO[semestrKey].keys():
+    for semestrKey in dictTimeOchnoe.keys():
+        dictTimeOchnoe[semestrKey]['Аудиторные занятия'] = str('0')
+        for timeKey in dictTimeOchnoe[semestrKey].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
-                dictTimeOO[semestrKey]['Аудиторные занятия'] = str(
-                    int(dictTimeOO[semestrKey]['Аудиторные занятия']) + int(dictTimeOO[semestrKey][timeKey]))
+                dictTimeOchnoe[semestrKey]['Аудиторные занятия'] = str(
+                    int(dictTimeOchnoe[semestrKey]['Аудиторные занятия']) + int(dictTimeOchnoe[semestrKey][timeKey]))
 
     timeKeysOO = list()
-    for key in dictTimeOO.keys():
+    for key in dictTimeOchnoe.keys():
         timeKeysOO.append(key)
 
     dictAllTimeOO = dict()
     dictAllTimeOO['Аудиторные занятия'] = str(0)
     dictAllTimeOO['allTime'] = str(0)
-    for keySemestr in dictTimeOO.keys():
-        for timeKey in dictTimeOO[keySemestr].keys():
+    for keySemestr in dictTimeOchnoe.keys():
+        for timeKey in dictTimeOchnoe[keySemestr].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
                 dictAllTimeOO['Аудиторные занятия'] = str(
-                    int(dictAllTimeOO['Аудиторные занятия']) + int(dictTimeOO[keySemestr][timeKey]))
+                    int(dictAllTimeOO['Аудиторные занятия']) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 try:
-                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+                    dictAllTimeOO[timeKey] = dictTimeOchnoe[keySemestr][timeKey]
             if timeKey == 'Самостоятельная работа' or timeKey == 'Итого часов':
                 try:
-                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+                    dictAllTimeOO[timeKey] = dictTimeOchnoe[keySemestr][timeKey]
     if 'Самостоятельная работа' in dictAllTimeOO.keys():
         dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
     else:
         dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия']
 
     timeTableOO = doc.tables[2]
-    match len(dictTimeOO):
+    match len(dictTimeOchnoe):
         case 1:
             for _ in range(3 * 13):
                 __DeleteRow(timeTableOO.rows[-1])
@@ -272,55 +272,55 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysOO[0]))
             if 'audTime' in cell.text:
-                if 'Аудиторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('audTime', dictTimeOO[timeKeysOO[0]]['Аудиторные занятия'])
+                if 'Аудиторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('audTime', dictTimeOchnoe[timeKeysOO[0]]['Аудиторные занятия'])
                 else:
                     cell.text = ''
             if 'practTime' in cell.text:
-                if 'Практические занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('practTime', dictTimeOO[timeKeysOO[0]]['Практические занятия'])
+                if 'Практические занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('practTime', dictTimeOchnoe[timeKeysOO[0]]['Практические занятия'])
                 else:
                     cell.text = ''
             if 'labTime' in cell.text:
-                if 'Лабораторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeOO[timeKeysOO[0]]['Лабораторные занятия'])
+                if 'Лабораторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
-                if 'Лекционные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('lectTime', dictTimeOO[timeKeysOO[0]]['Лекционные занятия'])
+                if 'Лекционные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('lectTime', dictTimeOchnoe[timeKeysOO[0]]['Лекционные занятия'])
                 else:
                     cell.text = ''
             if 'samTime' in cell.text:
-                if 'Самостоятельная работа' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('samTime', dictTimeOO[timeKeysOO[0]]['Самостоятельная работа'])
+                if 'Самостоятельная работа' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('samTime', dictTimeOchnoe[timeKeysOO[0]]['Самостоятельная работа'])
                 else:
                     cell.text = ''
             if 'kurs' in cell.text:
-                if 'Курсовой проект' in dictTimeOO[timeKeysOO[0]].keys():
+                if 'Курсовой проект' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'kr' in cell.text:
-                if 'Контрольная работа' in dictTimeOO[timeKeysOO[0]].keys():
+                if 'Контрольная работа' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'att' in cell.text:
-                if 'Зачет' in dictTimeOO[timeKeysOO[0]].keys():
+                if 'Зачет' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет')
-                elif 'Зачет с оценкой' in dictTimeOO[timeKeysOO[0]].keys():
+                elif 'Зачет с оценкой' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет с оценкой')
-                elif 'Экзамен' in dictTimeOO[timeKeysOO[0]].keys():
+                elif 'Экзамен' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Экзамен')
             if 'fullTime' in cell.text:
-                if 'Итого часов' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('fullTime', dictTimeOO[timeKeysOO[0]]['Итого часов'])
+                if 'Итого часов' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullTime', dictTimeOchnoe[timeKeysOO[0]]['Итого часов'])
                 else:
                     cell.text = ''
             if 'fullZed' in cell.text:
-                if 'ЗЕТ' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('fullZed', dictTimeOO[timeKeysOO[0]]['ЗЕТ'])
+                if 'ЗЕТ' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullZed', dictTimeOchnoe[timeKeysOO[0]]['ЗЕТ'])
                 else:
                     cell.text = ''
                 timeKeysOO.pop(0)
@@ -356,24 +356,24 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
                     else:
                         cell.text = ''
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[7].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[7].columns[0].cells:
         if 'comp' in cell.text:
             cell.text = cell.text.replace('comp', compiKeysOO[0])
             compiKeysOO.pop(0)
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[8].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[8].columns[0].cells:
         if 'comp' in cell.text:
@@ -386,9 +386,9 @@ def GenerateDocxOch(dictInfOO: dict, doc: Document) -> Document:
     return doc
 
 
-def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Document:
-    dictTimeOO = dictInfOO['Часы']
-    dictTimeZO = dictInfZO['Часы']
+def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Document) -> Document:
+    dictTimeOchnoe = dictFullInfOchnoe['Часы']
+    dictTimeZaochnoe = dictFullInfZaochnoe['Часы']
 
     kursRabFlagOO = False
     kursPrFlagOO = False
@@ -406,8 +406,8 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
     zedOO = int(0)
     zedZO = int(0)
 
-    for key in dictTimeOO.keys():
-        semestrDict = dictTimeOO[key]
+    for key in dictTimeOchnoe.keys():
+        semestrDict = dictTimeOchnoe[key]
         if 'Курсовая работа' in semestrDict.keys():
             kursRabFlagOO = True
             listKursRabOO.append(key)
@@ -419,8 +419,8 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
         if 'ЗЕТ' in semestrDict.keys():
             zedOO += int(semestrDict['ЗЕТ'])
 
-    for key in dictTimeZO.keys():
-        semestrDict = dictTimeZO[key]
+    for key in dictTimeZaochnoe.keys():
+        semestrDict = dictTimeZaochnoe[key]
         if 'Курсовая работа' in semestrDict.keys():
             kursRabFlagZO = True
             listKursRabOO.append(key)
@@ -471,49 +471,70 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
 
     stringKursPr = stringKursPrOO + stringKursPrZO
 
+    dictTypeWork = dict()
+    for semesterNumber in dictTimeOchnoe.keys():
+        for key in dictTimeOchnoe[semesterNumber].keys():
+            dictTypeWork[key] = 0
+    stringTypeWork = str()
+    for key in dictTypeWork.keys():
+        if key == 'Практические занятия':
+            stringTypeWork+= ' проводятся практические занятия,'
+        elif key == 'Лабораторные занятия':
+            stringTypeWork+= ' проводятся лабораторные работы,'
+        elif key == 'Лекционные занятия':
+            stringTypeWork+= ' читаются лекции,'
+        elif key == 'Курсовой проект':
+            stringTypeWork+= ' выполняется курсовой проект,'
+        elif key == 'Курсовая работа':
+            stringTypeWork+= ' выполняется курсовая работа,'
+        elif key == 'Контрольная работа':
+            stringTypeWork+= ' проводится контрольная работа,'
+    if stringTypeWork != '':
+        stringTypeWork = stringTypeWork[:-1]
+
     for object in doc.paragraphs:
         if 'name' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('name', dictInfOO['Название'])
+                run.text = run.text.replace('name', dictFullInfOchnoe['Название'])
         if 'spec' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('spec', dictInfOO['Специальность'])
+                run.text = run.text.replace('spec', dictFullInfOchnoe['Специальность'])
         if 'prof' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('prof', dictInfOO['Профиль'])
+                run.text = run.text.replace('prof', dictFullInfOchnoe['Профиль'])
         if 'qual' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('qual', dictInfOO['Квалификация'])
+                run.text = run.text.replace('qual', dictFullInfOchnoe['Квалификация'])
         if 'period' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('period', f"{dictInfOO['srok']} / {dictInfZO['srok']}")
+                run.text = run.text.replace('period', f"{dictFullInfOchnoe['srok']} / {dictFullInfZaochnoe['srok']}")
         if 'form' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('form', 'Очная/заочная')
         if 'startYear' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('startYear', dictInfOO['startYear'])
+                run.text = run.text.replace('startYear', dictFullInfOchnoe['startYear'])
         if 'B1O' in object.text:
             for run in object.runs:
                 if 'B1O' in run.text:
-                    if dictInfOO['B1'][3] == 'О':
+                    if dictFullInfOchnoe['B1'][3] == 'О':
                         run.text = run.text.replace('B1O', '')
                     else:
                         run.clear()
         if 'B1B' in object.text:
             for run in object.runs:
                 if 'B1B' in run.text:
-                    if dictInfOO['B1'][3] != 'О':
+                    if dictFullInfOchnoe['B1'][3] != 'О':
                         run.text = run.text.replace('B1B)', '')
                     else:
                         run.clear()
         if 'zed' in object.text:
             for run in object.runs:
-                run.text = run.text.replace('zed', f"{zedOO} / {zedZO}")
+                run.text = run.text.replace('zed', f"{zedOO}")
         if 'compList' in object.text:
             compStr = str()
-            for key in dictInfOO['Компетенции'].keys():
-                compStr += key + ' - ' + dictInfOO['Компетенции'][key] + '\n'
+            for key in dictFullInfOchnoe['Компетенции'].keys():
+                compStr += key + ' - ' + dictFullInfOchnoe['Компетенции'][key] + '\n'
             object.text = object.text.replace('compList', compStr)
         if 'kursPList' in object.text:
             for run in object.runs:
@@ -521,6 +542,15 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
         if 'kursRList' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('kursRList', stringKursRab)
+        if 'LabRList' in object.text:
+            labRFlag = False
+            for semestr in dictTimeOchnoe.keys():
+                if 'Лабораторные занятия' in dictTimeOchnoe[semestr].keys():
+                    labRFlag = True
+            if labRFlag == True:
+                __DeleteParagraph(object)
+            else:
+                object.text = object.text.replace('LabRList', '')
         if ('KPrY' in object.text):
             for run in object.runs:
                 run.text = run.text.replace('KPrY', '')
@@ -551,59 +581,61 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                 run.text = run.text.replace('KRN', '')
             if (konRabFlagOO == True or konRabFlagZO == True):
                 __DeleteParagraph(object)
-
+        if 'stringTypeWork' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('stringTypeWork', stringTypeWork)
         if 'timeTableZ' in object.text:
             object.runs[0].text = object.runs[0].text.replace('timeTableZ', '')
         if 'allTimeTableZ' in object.text:
             object.runs[0].text = object.runs[0].text.replace('allTimeTableZ', '')
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[1].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[1].columns[0].cells:
         if 'comp' in cell.text:
             cell.text = cell.text.replace('comp', compiKeysOO[0])
             compiKeysOO.pop(0)
 
-    for semestrKey in dictTimeOO.keys():
-        dictTimeOO[semestrKey]['Аудиторные занятия'] = str('0')
-        for timeKey in dictTimeOO[semestrKey].keys():
+    for semestrKey in dictTimeOchnoe.keys():
+        dictTimeOchnoe[semestrKey]['Аудиторные занятия'] = str('0')
+        for timeKey in dictTimeOchnoe[semestrKey].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
-                dictTimeOO[semestrKey]['Аудиторные занятия'] = str(
-                    int(dictTimeOO[semestrKey]['Аудиторные занятия']) + int(dictTimeOO[semestrKey][timeKey]))
+                dictTimeOchnoe[semestrKey]['Аудиторные занятия'] = str(
+                    int(dictTimeOchnoe[semestrKey]['Аудиторные занятия']) + int(dictTimeOchnoe[semestrKey][timeKey]))
 
     timeKeysOO = list()
-    for key in dictTimeOO.keys():
+    for key in dictTimeOchnoe.keys():
         timeKeysOO.append(key)
 
     dictAllTimeOO = dict()
     dictAllTimeOO['Аудиторные занятия'] = str(0)
     dictAllTimeOO['allTime'] = str(0)
-    for keySemestr in dictTimeOO.keys():
-        for timeKey in dictTimeOO[keySemestr].keys():
+    for keySemestr in dictTimeOchnoe.keys():
+        for timeKey in dictTimeOchnoe[keySemestr].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
                 dictAllTimeOO['Аудиторные занятия'] = str(
-                    int(dictAllTimeOO['Аудиторные занятия']) + int(dictTimeOO[keySemestr][timeKey]))
+                    int(dictAllTimeOO['Аудиторные занятия']) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 try:
-                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+                    dictAllTimeOO[timeKey] = dictTimeOchnoe[keySemestr][timeKey]
             if timeKey == 'Самостоятельная работа' or timeKey == 'Итого часов':
                 try:
-                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOO[keySemestr][timeKey]))
+                    dictAllTimeOO[timeKey] = str(int(dictAllTimeOO[timeKey]) + int(dictTimeOchnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeOO[timeKey] = dictTimeOO[keySemestr][timeKey]
+                    dictAllTimeOO[timeKey] = dictTimeOchnoe[keySemestr][timeKey]
     if 'Самостоятельная работа' in dictAllTimeOO.keys():
         dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия'] + dictAllTimeOO['Самостоятельная работа']
     else:
         dictAllTimeOO['allTime'] = dictAllTimeOO['Аудиторные занятия']
 
     timeTableOO = doc.tables[2]
-    match len(dictTimeOO):
+    match len(dictTimeOchnoe):
         case 1:
             for _ in range(3 * 13):
                 __DeleteRow(timeTableOO.rows[-1])
@@ -658,55 +690,55 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysOO[0]))
             if 'audTime' in cell.text:
-                if 'Аудиторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('audTime', dictTimeOO[timeKeysOO[0]]['Аудиторные занятия'])
+                if 'Аудиторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('audTime', dictTimeOchnoe[timeKeysOO[0]]['Аудиторные занятия'])
                 else:
                     cell.text = ''
             if 'practTime' in cell.text:
-                if 'Практические занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('practTime', dictTimeOO[timeKeysOO[0]]['Практические занятия'])
+                if 'Практические занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('practTime', dictTimeOchnoe[timeKeysOO[0]]['Практические занятия'])
                 else:
                     cell.text = ''
             if 'labTime' in cell.text:
-                if 'Лабораторные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeOO[timeKeysOO[0]]['Лабораторные занятия'])
+                if 'Лабораторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
-                if 'Лекционные занятия' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('lectTime', dictTimeOO[timeKeysOO[0]]['Лекционные занятия'])
+                if 'Лекционные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('lectTime', dictTimeOchnoe[timeKeysOO[0]]['Лекционные занятия'])
                 else:
                     cell.text = ''
             if 'samTime' in cell.text:
-                if 'Самостоятельная работа' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('samTime', dictTimeOO[timeKeysOO[0]]['Самостоятельная работа'])
+                if 'Самостоятельная работа' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('samTime', dictTimeOchnoe[timeKeysOO[0]]['Самостоятельная работа'])
                 else:
                     cell.text = ''
             if 'kurs' in cell.text:
-                if ('Курсовой проект' or 'Курсовая работа') in dictTimeOO[timeKeysOO[0]].keys():
+                if ('Курсовой проект' or 'Курсовая работа') in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'kr' in cell.text:
-                if 'Контрольная работа' in dictTimeOO[timeKeysOO[0]].keys():
+                if 'Контрольная работа' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'att' in cell.text:
-                if 'Зачет' in dictTimeOO[timeKeysOO[0]].keys():
+                if 'Зачет' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет')
-                elif 'Зачет с оценкой' in dictTimeOO[timeKeysOO[0]].keys():
+                elif 'Зачет с оценкой' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет с оценкой')
-                elif 'Экзамен' in dictTimeOO[timeKeysOO[0]].keys():
+                elif 'Экзамен' in dictTimeOchnoe[timeKeysOO[0]].keys():
                     cell.text = cell.text.replace('att', 'Экзамен')
             if 'fullTime' in cell.text:
-                if 'Итого часов' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('fullTime', dictTimeOO[timeKeysOO[0]]['Итого часов'])
+                if 'Итого часов' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullTime', dictTimeOchnoe[timeKeysOO[0]]['Итого часов'])
                 else:
                     cell.text = ''
             if 'fullZed' in cell.text:
-                if 'ЗЕТ' in dictTimeOO[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('fullZed', dictTimeOO[timeKeysOO[0]]['ЗЕТ'])
+                if 'ЗЕТ' in dictTimeOchnoe[timeKeysOO[0]].keys():
+                    cell.text = cell.text.replace('fullZed', dictTimeOchnoe[timeKeysOO[0]]['ЗЕТ'])
                 else:
                     cell.text = ''
                 timeKeysOO.pop(0)
@@ -742,41 +774,41 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                     else:
                         cell.text = ''
 
-    for semestrKey in dictTimeZO.keys():
-        dictTimeZO[semestrKey]['Аудиторные занятия'] = str('0')
-        for timeKey in dictTimeZO[semestrKey].keys():
+    for semestrKey in dictTimeZaochnoe.keys():
+        dictTimeZaochnoe[semestrKey]['Аудиторные занятия'] = str('0')
+        for timeKey in dictTimeZaochnoe[semestrKey].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
-                dictTimeZO[semestrKey]['Аудиторные занятия'] = str(
-                    int(dictTimeZO[semestrKey]['Аудиторные занятия']) + int(dictTimeZO[semestrKey][timeKey]))
+                dictTimeZaochnoe[semestrKey]['Аудиторные занятия'] = str(
+                    int(dictTimeZaochnoe[semestrKey]['Аудиторные занятия']) + int(dictTimeZaochnoe[semestrKey][timeKey]))
 
     timeKeysZO = list()
-    for key in dictTimeZO.keys():
+    for key in dictTimeZaochnoe.keys():
         timeKeysZO.append(key)
 
     dictAllTimeZO = dict()
     dictAllTimeZO['Аудиторные занятия'] = str(0)
     dictAllTimeZO['allTime'] = str(0)
-    for keySemestr in dictTimeZO.keys():
-        for timeKey in dictTimeZO[keySemestr].keys():
+    for keySemestr in dictTimeZaochnoe.keys():
+        for timeKey in dictTimeZaochnoe[keySemestr].keys():
             if timeKey == 'Практические занятия' or timeKey == 'Лабораторные занятия' or timeKey == 'Лекционные занятия':
                 dictAllTimeZO['Аудиторные занятия'] = str(
-                    int(dictAllTimeZO['Аудиторные занятия']) + int(dictTimeZO[keySemestr][timeKey]))
+                    int(dictAllTimeZO['Аудиторные занятия']) + int(dictTimeZaochnoe[keySemestr][timeKey]))
                 try:
-                    dictAllTimeZO[timeKey] = str(int(dictAllTimeZO[timeKey]) + int(dictTimeZO[keySemestr][timeKey]))
+                    dictAllTimeZO[timeKey] = str(int(dictAllTimeZO[timeKey]) + int(dictTimeZaochnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeZO[timeKey] = dictTimeZO[keySemestr][timeKey]
+                    dictAllTimeZO[timeKey] = dictTimeZaochnoe[keySemestr][timeKey]
             if timeKey == 'Самостоятельная работа' or timeKey == 'Итого часов':
                 try:
-                    dictAllTimeZO[timeKey] = str(int(dictAllTimeZO[timeKey]) + int(dictTimeZO[keySemestr][timeKey]))
+                    dictAllTimeZO[timeKey] = str(int(dictAllTimeZO[timeKey]) + int(dictTimeZaochnoe[keySemestr][timeKey]))
                 except:
-                    dictAllTimeZO[timeKey] = dictTimeZO[keySemestr][timeKey]
+                    dictAllTimeZO[timeKey] = dictTimeZaochnoe[keySemestr][timeKey]
     if 'Самостоятельная работа' in dictAllTimeZO.keys():
         dictAllTimeZO['allTime'] = dictAllTimeZO['Аудиторные занятия'] + dictAllTimeZO['Самостоятельная работа']
     else:
         dictAllTimeZO['allTime'] = dictAllTimeZO['Аудиторные занятия']
 
     timeTableZO = doc.tables[3]
-    match len(dictTimeZO):
+    match len(dictTimeZaochnoe):
         case 1:
             for _ in range(3 * 13):
                 __DeleteRow(timeTableZO.rows[-1])
@@ -831,55 +863,55 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
             if 'semestr' in cell.text:
                 cell.text = cell.text.replace('semestr', str(timeKeysZO[0]))
             if 'audTime' in cell.text:
-                if 'Аудиторные занятия' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('audTime', dictTimeZO[timeKeysZO[0]]['Аудиторные занятия'])
+                if 'Аудиторные занятия' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('audTime', dictTimeZaochnoe[timeKeysZO[0]]['Аудиторные занятия'])
                 else:
                     cell.text = ''
             if 'practTime' in cell.text:
-                if 'Практические занятия' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('practTime', dictTimeZO[timeKeysZO[0]]['Практические занятия'])
+                if 'Практические занятия' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('practTime', dictTimeZaochnoe[timeKeysZO[0]]['Практические занятия'])
                 else:
                     cell.text = ''
             if 'labTime' in cell.text:
-                if 'Лабораторные занятия' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeZO[timeKeysZO[0]]['Лабораторные занятия'])
+                if 'Лабораторные занятия' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('labTime', dictTimeZaochnoe[timeKeysZO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
-                if 'Лекционные занятия' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('lectTime', dictTimeZO[timeKeysZO[0]]['Лекционные занятия'])
+                if 'Лекционные занятия' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('lectTime', dictTimeZaochnoe[timeKeysZO[0]]['Лекционные занятия'])
                 else:
                     cell.text = ''
             if 'samTime' in cell.text:
-                if 'Самостоятельная работа' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('samTime', dictTimeZO[timeKeysZO[0]]['Самостоятельная работа'])
+                if 'Самостоятельная работа' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('samTime', dictTimeZaochnoe[timeKeysZO[0]]['Самостоятельная работа'])
                 else:
                     cell.text = ''
             if 'kurs' in cell.text:
-                if ('Курсовой проект' or 'Курсовая работа') in dictTimeZO[timeKeysZO[0]].keys():
+                if ('Курсовой проект' or 'Курсовая работа') in dictTimeZaochnoe[timeKeysZO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'kr' in cell.text:
-                if 'Контрольная работа' in dictTimeZO[timeKeysZO[0]].keys():
+                if 'Контрольная работа' in dictTimeZaochnoe[timeKeysZO[0]].keys():
                     cell.text = '+'
                 else:
                     cell.text = '-'
             if 'att' in cell.text:
-                if 'Зачет' in dictTimeZO[timeKeysZO[0]].keys():
+                if 'Зачет' in dictTimeZaochnoe[timeKeysZO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет')
-                elif 'Зачет с оценкой' in dictTimeZO[timeKeysZO[0]].keys():
+                elif 'Зачет с оценкой' in dictTimeZaochnoe[timeKeysZO[0]].keys():
                     cell.text = cell.text.replace('att', 'Зачет с оценкой')
-                elif 'Экзамен' in dictTimeZO[timeKeysZO[0]].keys():
+                elif 'Экзамен' in dictTimeZaochnoe[timeKeysZO[0]].keys():
                     cell.text = cell.text.replace('att', 'Экзамен')
             if 'fullTime' in cell.text:
-                if 'Итого часов' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('fullTime', dictTimeZO[timeKeysZO[0]]['Итого часов'])
+                if 'Итого часов' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('fullTime', dictTimeZaochnoe[timeKeysZO[0]]['Итого часов'])
                 else:
                     cell.text = ''
             if 'fullZed' in cell.text:
-                if 'ЗЕТ' in dictTimeZO[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('fullZed', dictTimeZO[timeKeysZO[0]]['ЗЕТ'])
+                if 'ЗЕТ' in dictTimeZaochnoe[timeKeysZO[0]].keys():
+                    cell.text = cell.text.replace('fullZed', dictTimeZaochnoe[timeKeysZO[0]]['ЗЕТ'])
                 else:
                     cell.text = ''
                 timeKeysZO.pop(0)
@@ -915,24 +947,24 @@ def GenerateDocxOchZ(dictInfOO: dict, dictInfZO: dict, doc: Document) -> Documen
                     else:
                         cell.text = ''
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[7].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[7].columns[0].cells:
         if 'comp' in cell.text:
             cell.text = cell.text.replace('comp', compiKeysOO[0])
             compiKeysOO.pop(0)
 
-    for _ in range(4 - len(dictInfOO['Компетенции'])):
+    for _ in range(4 - len(dictFullInfOchnoe['Компетенции'])):
         for _ in range(3):
             __DeleteRow(doc.tables[8].rows[-1])
 
     compiKeysOO = list()
-    for key in dictInfOO['Компетенции'].keys():
+    for key in dictFullInfOchnoe['Компетенции'].keys():
         compiKeysOO.append(key)
     for cell in doc.tables[8].columns[0].cells:
         if 'comp' in cell.text:
@@ -1065,7 +1097,7 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf['Квалификация'] = __GetQualification(plxData)
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
     dictInf['Часы'] = __SearchHours(disciplineCode, plxData)
-    pprint.pp(dictInf['Часы'])
+    # pprint.pp(dictInf['Часы'])
     dictInf['B1'] = __GetB1(disciplineCode, plxData)
     dictInf['startYear'] = __GetStartYear(plxData)
     dictInf['srok'] = __GetSrok(plxData)

@@ -87,7 +87,8 @@ class MainWindow(QWidget):
                                                 self.fileDataOch)
                     doc = parser.GenerateDocxOch(fullInf, doc)
                 parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
-            except:
+            except Exception as e:
+                print(e)
                 QMessageBox.critical(self, 'Generate docx file ERROR',
                                      f"An ERROR occurred during file generation {self.rightListWidget.item(index).text()}")
         self.rightListWidget.clear()
