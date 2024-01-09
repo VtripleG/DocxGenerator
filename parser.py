@@ -86,6 +86,27 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
         for index in range(1, len(listKursPrOO)):
             stringKursPrOO += f", в {listKursPrOO[index]} семестре для очной формы обучения"
 
+    dictTypeWork = dict()
+    for semesterNumber in dictTimeOchnoe.keys():
+        for key in dictTimeOchnoe[semesterNumber].keys():
+            dictTypeWork[key] = 0
+    stringTypeWork = str()
+    for key in dictTypeWork.keys():
+        if key == 'Практические занятия':
+            stringTypeWork += ' проводятся практические занятия,'
+        elif key == 'Лабораторные занятия':
+            stringTypeWork += ' проводятся лабораторные работы,'
+        elif key == 'Лекционные занятия':
+            stringTypeWork += ' читаются лекции,'
+        elif key == 'Курсовой проект':
+            stringTypeWork += ' выполняется курсовой проект,'
+        elif key == 'Курсовая работа':
+            stringTypeWork += ' выполняется курсовая работа,'
+        elif key == 'Контрольная работа':
+            stringTypeWork += ' проводится контрольная работа,'
+    if stringTypeWork != '':
+        stringTypeWork = stringTypeWork[:-1]
+
     for object in doc.paragraphs:
         if 'name' in object.text:
             for run in object.runs:
@@ -136,36 +157,39 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
         if 'kursRList' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('kursRList', stringKursRabOO)
-        if ('KPrY' in object.text):
+        if 'KPrY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPrY', '')
             if (kursPrFlagOO == False):
                 __DeleteParagraph(object)
-        if ('KRabY' in object.text):
+        if 'KRabY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRabY', '')
             if (kursRabFlagOO == False):
                 __DeleteParagraph(object)
-        if ('KPY' in object.text):
+        if 'KPY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPY', '')
             if (kursPrFlagOO == False and kursRabFlagOO == False):
                 __DeleteParagraph(object)
-        if ('KPN' in object.text):
+        if 'KPN' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPN', '')
             if (kursPrFlagOO == True or kursRabFlagOO == True):
                 __DeleteParagraph(object)
-        if ('KRY' in object.text):
+        if 'KRY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRY', '')
             if (konRabFlagOO == False):
                 __DeleteParagraph(object)
-        if ('KRN' in object.text):
+        if 'KRN' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRN', '')
             if (konRabFlagOO == True):
                 __DeleteParagraph(object)
+        if 'stringTypeWork' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('stringTypeWork', stringTypeWork)
         if 'timeTableZ' in object.text:
             __DeleteParagraph(object)
         if 'allTimeTableZ' in object.text:
@@ -393,10 +417,12 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
     kursRabFlagOO = False
     kursPrFlagOO = False
     konRabFlagOO = False
+    practicalTrainingFlagOchnoe = False
 
     kursRabFlagZO = False
     kursPrFlagZO = False
     konRabFlagZO = False
+    practicalTrainingFlagZaochnoe = False
 
     listKursRabOO = list()
     listKursRabZO = list()
@@ -418,6 +444,8 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
             konRabFlagOO = True
         if 'ЗЕТ' in semestrDict.keys():
             zedOO += int(semestrDict['ЗЕТ'])
+        if '' in semestrDict.keys():
+            practicalTrainingFlagOchnoe = True
 
     for key in dictTimeZaochnoe.keys():
         semestrDict = dictTimeZaochnoe[key]
@@ -431,6 +459,8 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
             konRabFlagZO = True
         if 'ЗЕТ' in semestrDict.keys():
             zedZO += int(semestrDict['ЗЕТ'])
+        if '' in semestrDict.keys():
+            practicalTrainingFlagZaochnoe = True
 
     stringKursRabOO = str()
     if len(listKursRabOO) != 0:
@@ -492,6 +522,17 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
     if stringTypeWork != '':
         stringTypeWork = stringTypeWork[:-1]
 
+    listSemestersOchnoe = dictTimeOchnoe.keys()
+    listSemestersZaochnoe = dictTimeZaochnoe.keys()
+    stringAttistatList = str()
+
+    for semesterNumber in listSemestersOchnoe:
+        stringAttistatList+= f"{semesterNumber} семестре для очной формы обучения, "
+    for semesterNumber in listSemestersZaochnoe:
+        stringAttistatList+= f"{semesterNumber} семестре для заочной формы обучения, "
+
+    stringAttistatList = stringAttistatList[:-1]
+
     for object in doc.paragraphs:
         if 'name' in object.text:
             for run in object.runs:
@@ -551,36 +592,45 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
                 __DeleteParagraph(object)
             else:
                 object.text = object.text.replace('LabRList', '')
-        if ('KPrY' in object.text):
+        if 'PractPodgotov' in object.text:
+            if (practicalTrainingFlagOchnoe == True) or (practicalTrainingFlagZaochnoe == True):
+                for run in object.runs:
+                    run.text = run.text.replace('PractPodgotov', '')
+            else:
+                __DeleteParagraph(object)
+        if 'KPrY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPrY', '')
             if (kursPrFlagOO == False and kursPrFlagZO == False):
                 __DeleteParagraph(object)
-        if ('KRabY' in object.text):
+        if 'KRabY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRabY', '')
             if (kursRabFlagZO == False and kursRabFlagOO == False):
                 __DeleteParagraph(object)
-        if ('KPY' in object.text):
+        if 'KPY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPY', '')
             if (kursPrFlagOO == False and kursPrFlagZO == False and kursRabFlagOO == False and kursRabFlagZO == False):
                 __DeleteParagraph(object)
-        if ('KPN' in object.text):
+        if 'KPN' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KPN', '')
             if (kursPrFlagOO == True or kursPrFlagZO == True or kursRabFlagOO == True):
                 __DeleteParagraph(object)
-        if ('KRY' in object.text):
+        if 'KRY' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRY', '')
             if (konRabFlagOO == False and konRabFlagZO == False):
                 __DeleteParagraph(object)
-        if ('KRN' in object.text):
+        if 'KRN' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('KRN', '')
             if (konRabFlagOO == True or konRabFlagZO == True):
                 __DeleteParagraph(object)
+        if 'attistList' in object.text:
+            for run in object.runs:
+                run.text = run.text.replace('attistList', stringAttistatList)
         if 'stringTypeWork' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('stringTypeWork', stringTypeWork)
@@ -970,6 +1020,36 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
         if 'comp' in cell.text:
             cell.text = cell.text.replace('comp', compiKeysOO[0])
             compiKeysOO.pop(0)
+
+    tableCollumnType = doc.tables[10].columns[0]
+    for cellNumber in range(len(tableCollumnType.cells)-1, 0, -1):
+        if 'lectType' in tableCollumnType.cells[cellNumber].text:
+            if 'Лекционные занятия' in dictTypeWork.keys():
+                for run in tableCollumnType.cells[cellNumber].paragraphs[0].runs:
+                    run.text = run.text.replace('lectType', '')
+            else:
+                __DeleteRow(doc.tables[10].rows[cellNumber])
+        elif 'practType' in tableCollumnType.cells[cellNumber].text:
+            if 'Практические занятия' in dictTypeWork.keys():
+                for run in tableCollumnType.cells[cellNumber].paragraphs[0].runs:
+                    run.text = run.text.replace('practType', '')
+            else:
+                __DeleteRow(doc.tables[10].rows[cellNumber])
+        elif 'labType' in tableCollumnType.cells[cellNumber].text:
+            if 'Лабораторные занятия' in dictTypeWork.keys():
+                for run in tableCollumnType.cells[cellNumber].paragraphs[0].runs:
+                    run.text = run.text.replace('labType', '')
+            else:
+                __DeleteRow(doc.tables[10].rows[cellNumber])
+        elif 'samType' in tableCollumnType.cells[cellNumber].text:
+            if 'Самостоятельная работа' in dictTypeWork.keys():
+                for run in tableCollumnType.cells[cellNumber].paragraphs[0].runs:
+                    run.text = run.text.replace('samType', '')
+            else:
+                __DeleteRow(doc.tables[10].rows[cellNumber])
+
+    if (practicalTrainingFlagOchnoe == False) and (practicalTrainingFlagZaochnoe == False):
+        __DeleteTable(doc.tables[6])
 
     return doc
 

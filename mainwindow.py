@@ -4,6 +4,7 @@ from docx import Document
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout, QFileDialog, \
     QLineEdit, QSizePolicy, QMessageBox
 from PyQt5.QtCore import Qt
+from PyQt5.Qt import QCursor
 
 
 
@@ -66,7 +67,7 @@ class MainWindow(QWidget):
             return
         filePath += '/'
         self.setEnabled(False)
-        # self.setCursor(Qt.WaitCursor)
+        # self.setCursor(QCursor(Qt.WaitCursor))
         for index in range(self.rightListWidget.count()):
             try:
                 doc = parser.ReadDocxTemplate('./examples/RPD.docx')
@@ -92,6 +93,7 @@ class MainWindow(QWidget):
                 QMessageBox.critical(self, 'Generate docx file ERROR',
                                      f"An ERROR occurred during file generation {self.rightListWidget.item(index).text()}")
         self.rightListWidget.clear()
+        # self.setCursor(Qt.ArrowCursor)
         QMessageBox.information(self, 'Complite', 'Generate complite!')
         self.setEnabled(True)
 
