@@ -530,7 +530,7 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
         stringAttistatList+= f"{semesterNumber} семестре для очной формы обучения, "
     for semesterNumber in listSemestersZaochnoe:
         stringAttistatList+= f"{semesterNumber} семестре для заочной формы обучения, "
-
+    #
     stringAttistatList = stringAttistatList[:-1]
 
     for object in doc.paragraphs:
