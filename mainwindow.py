@@ -3,14 +3,14 @@ import parser
 from docx import Document
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout, QFileDialog, \
     QLineEdit, QSizePolicy, QMessageBox
-from PyQt5.QtCore import Qt
-from PyQt5.Qt import QCursor
-
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
 
 
 class MainWindow(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent = None):
         super().__init__(parent)
+        self.app = app
         self.discListOch = dict()
         self.discListZaoch = dict()
         self.searchLine = QLineEdit()
@@ -26,6 +26,7 @@ class MainWindow(QWidget):
         self.leftLay.addLayout(self.searchLay)
         self.generateButton = QPushButton()
         self.generateButton.setText('Generate docx')
+        self.generateButton.setEnabled(False)
         self.setMinimumSize(640, 780)
         self.leftListWidget = QListWidget()
         self.rightListWidget = QListWidget()
@@ -56,18 +57,21 @@ class MainWindow(QWidget):
     def DoubleClickedOnLeftWidget(self):
         self.rightListWidget.addItem(self.leftListWidget.itemFromIndex(self.leftListWidget.currentIndex()).text())
         self.leftListWidget.takeItem(self.leftListWidget.currentRow())
+        if self.rightListWidget.count() != 0:
+            self.generateButton.setEnabled(True)
 
     def DoubleClickedOnRightWidget(self):
         self.leftListWidget.addItem(self.rightListWidget.itemFromIndex(self.rightListWidget.currentIndex()).text())
         self.rightListWidget.takeItem(self.rightListWidget.currentRow())
+        if self.rightListWidget.count() == 0:
+            self.generateButton.setEnabled(False)
 
     def GenerateButtonClicked(self):
         filePath = QFileDialog.getExistingDirectory()
         if filePath == '':
             return
         filePath += '/'
-        self.setEnabled(False)
-        # self.setCursor(QCursor(Qt.WaitCursor))
+        self.setCursor(QCursor(Qt.WaitCursor))
         for index in range(self.rightListWidget.count()):
             try:
                 doc = parser.ReadDocxTemplate('./examples/RPD.docx')
@@ -93,9 +97,9 @@ class MainWindow(QWidget):
                 QMessageBox.critical(self, 'Generate docx file ERROR',
                                      f"An ERROR occurred during file generation {self.rightListWidget.item(index).text()}")
         self.rightListWidget.clear()
-        # self.setCursor(Qt.ArrowCursor)
         QMessageBox.information(self, 'Complite', 'Generate complite!')
-        self.setEnabled(True)
+        self.setCursor(QCursor(Qt.ArrowCursor))
+        self.generateButton.setEnabled(False)
 
     def SearchButtonClicked(self):
         self.leftListWidget.clear()
