@@ -1,4 +1,6 @@
-__pycache__
-*.cfg
-*.spec
 build
+.idea
+dist
+*.spec
+__pycache__
+venv
