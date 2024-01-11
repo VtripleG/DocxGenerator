@@ -1238,31 +1238,3 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf['srok'] = __GetSrok(plxData)
 
     return dictInf
-
-# _________________________________________________________________________________________________________________________________________Test code
-
-# doc = ReadDocxTemplate('./examples/RPD.docx')
-# fileDataOO = XmlToDict('./data/ochnoe.plx')
-# discListOO = GetDisciplineList(fileDataOO)
-# dictInfOO = GetFullInf('Информатика', KeyFromVal(discListOO, 'Информатика'), fileDataOO)
-#
-# fileDataZO = XmlToDict('./data/zaoch.plx')
-# discListZO = GetDisciplineList(fileDataZO)
-# dictInfZO = GetFullInf('Информатика', KeyFromVal(discListZO, 'Информатика'), fileDataZO)
-#
-# doc = GenerateDocxOchZ(dictInfOO, dictInfZO, doc)
-# SaveDocx(doc, 'test_ZO', './files/')
-#
-# doc = ReadDocxTemplate('./examples/RPD.docx')
-# fileData = XmlToDict('./data/ochnoe.plx')
-# discList = GetDisciplineList(fileData)
-# dictInf = GetFullInf('Информатика', KeyFromVal(discList, 'Информатика'), fileData)
-# doc = GenerateDocxOch(dictInf, doc)
-# SaveDocx(doc, 'test_O', './files/')
-
-# dictInf = XmlToDict('./data/zaoch.plx')
-# with open('./data/zaochnoe.json', 'w', encoding='utf8') as file:
-#     json.dump(dictInf, file, ensure_ascii=False, indent=4)
-
-# Базы данных
-# Информатика

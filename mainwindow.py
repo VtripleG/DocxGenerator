@@ -8,7 +8,7 @@ from PySide6.QtGui import QCursor
 
 
 class MainWindow(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.app = app
         self.discListOch = dict()
@@ -19,9 +19,13 @@ class MainWindow(QWidget):
         self.searchButton.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.searchButton.setText('Search')
         self.searchButton.clicked.connect(self.SearchButtonClicked)
+        self.showAllButton = QPushButton()
+        self.showAllButton.setText('Show all')
+        self.showAllButton.clicked.connect(self.ShowAllButtonClicked)
         self.searchLay = QHBoxLayout()
         self.searchLay.addWidget(self.searchLine)
         self.searchLay.addWidget(self.searchButton)
+        self.searchLay.addWidget(self.showAllButton)
         self.leftLay = QVBoxLayout()
         self.leftLay.addLayout(self.searchLay)
         self.generateButton = QPushButton()
@@ -132,6 +136,10 @@ class MainWindow(QWidget):
         self.fileDataZaoch = parser.XmlToDict(path)
         self.discListZaoch = parser.GetDisciplineList(self.fileDataZaoch)
 
+    def ShowAllButtonClicked(self):
+        self.leftListWidget.clear()
+        for key in self.discListOch.keys():
+            self.leftListWidget.addItem(self.discListOch[key])
 
 if __name__ == "__main__":
     app = QApplication([])
