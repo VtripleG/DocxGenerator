@@ -11,42 +11,6 @@ except TypeError:
 
     document = Document()
 
-
-def SearchParagraph(paragraphs, str):
-    count = 0
-    for paragraph in paragraphs:
-        count += 1
-        if str in paragraph.text:
-            print(count)
-
-
-def __DeleteLastColumn(table_index, document):
-    table = document.tables[table_index]
-    grid = table._tbl.find("w:tblGrid", table._tbl.nsmap)
-    for cell in table.column_cells(-1):
-        cell._tc.getparent().remove(cell._tc)
-    col_elem = grid[-1]
-    grid.remove(col_elem)
-
-
-def __DeleteRow(item):
-    item._element.getparent().remove(item._element)
-
-
-def __DeleteTable(table):
-    table._element.getparent().remove(table._element)
-
-
-def __DeleteParagraph(paragraph):
-    paragraph._element.getparent().remove(paragraph._element)
-
-
-def XmlToDict(fileName):
-    with (open(fileName, 'r', encoding='utf16') as xml_file):
-        xml_data = xmltodict.parse(xml_file.read())
-    return xml_data
-
-
 def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
     dictTimeOchnoe = dictFullInfOchnoe['Часы']
 
@@ -488,6 +452,11 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
     zedOO = int(0)
     zedZO = int(0)
 
+    if bool(dictFullInfOchnoe['Практическая подготовка']):
+        practicalTrainingFlagOchnoe = True
+    if bool(dictTimeZaochnoe['Практическая подготовка']):
+        practicalTrainingFlagZaochnoe == True
+
     for key in dictTimeOchnoe.keys():
         semestrDict = dictTimeOchnoe[key]
         if 'Курсовая работа' in semestrDict.keys():
@@ -500,8 +469,6 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
             konRabFlagOO = True
         if 'ЗЕТ' in semestrDict.keys():
             zedOO += int(semestrDict['ЗЕТ'])
-        if '' in semestrDict.keys():
-            practicalTrainingFlagOchnoe = True
 
     for key in dictTimeZaochnoe.keys():
         semestrDict = dictTimeZaochnoe[key]
@@ -515,8 +482,6 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
             konRabFlagZO = True
         if 'ЗЕТ' in semestrDict.keys():
             zedZO += int(semestrDict['ЗЕТ'])
-        if '' in semestrDict.keys():
-            practicalTrainingFlagZaochnoe = True
 
     stringKursRabOO = str()
     if len(listKursRabOO) != 0:
@@ -806,7 +771,10 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
                     cell.text = ''
             if 'labTime' in cell.text:
                 if 'Лабораторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
+                    if timeKeysOO[0] in dictFullInfOchnoe['Практическая подготовка'].keys():
+                        cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия']+ '\n' + dictFullInfOchnoe['Практическая подготовка'][timeKeysOO[0]]['Лабораторные занятия'])
+                    else:
+                        cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
@@ -1109,6 +1077,41 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
     return doc
 
 
+def SearchParagraph(paragraphs, str):
+    count = 0
+    for paragraph in paragraphs:
+        count += 1
+        if str in paragraph.text:
+            print(count)
+
+
+def __DeleteLastColumn(table_index, document):
+    table = document.tables[table_index]
+    grid = table._tbl.find("w:tblGrid", table._tbl.nsmap)
+    for cell in table.column_cells(-1):
+        cell._tc.getparent().remove(cell._tc)
+    col_elem = grid[-1]
+    grid.remove(col_elem)
+
+
+def __DeleteRow(item):
+    item._element.getparent().remove(item._element)
+
+
+def __DeleteTable(table):
+    table._element.getparent().remove(table._element)
+
+
+def __DeleteParagraph(paragraph):
+    paragraph._element.getparent().remove(paragraph._element)
+
+
+def XmlToDict(fileName):
+    with (open(fileName, 'r', encoding='utf16') as xml_file):
+        xml_data = xmltodict.parse(xml_file.read())
+    return xml_data
+
+
 def GetDisciplineList(plxData: dict) -> dict:
     list = {}
     for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыСтроки']:
@@ -1207,8 +1210,6 @@ def GetFullInfOchnoe(disciplineName: str, disciplineCode: str, plxData: dict) ->
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
     dictInf['Часы'] = __SearchHoursOcnoe(disciplineCode, plxData)
     dictInf['Практическая подготовка'] = __SearchPracticalJobsOchnoe(disciplineCode, plxData)
-    if not dictInf['Практическая подготовка']:
-        dictInf.pop('Практическая подготовка')
     dictInf['B1'] = __GetB1(disciplineCode, plxData)
     dictInf['startYear'] = __GetStartYear(plxData)
     dictInf['srok'] = __GetSrok(plxData)
@@ -1224,8 +1225,6 @@ def GetFullInfZaochnoe(disciplineName: str, disciplineCode: str, plxData: dict) 
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
     dictInf['Часы'] = __SearchHoursZaochnoe(disciplineCode, plxData)
     dictInf['Практическая подготовка'] = __SearchPracticalJobsZaochnoe(disciplineCode, plxData)
-    if not dictInf['Практическая подготовка']:
-        dictInf.pop('Практическая подготовка')
     if 'Практическая подготовка' in dictInf.keys():
         print(dictInf['Практическая подготовка'])
     dictInf['B1'] = __GetB1(disciplineCode, plxData)
