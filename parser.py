@@ -1335,10 +1335,12 @@ def __SearchHoursZaochnoe(disciplineCode: str, plxData: dict) -> dict:
     dict = {}
     sessionNumber = []
     for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
-        if object['@КодОбъекта'] == disciplineCode:
+        if object['@КодОбъекта'] == disciplineCode and object['@Семестр'] == '0':
             num = int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2)
             if sessionNumber.__contains__(num) == False:
                 sessionNumber.append(num)
     for i in range(sessionNumber.__len__()):
         dict[sessionNumber[i]] = __SearchHoursBySessionNumberZaochnoe(sessionNumber[i], disciplineCode, plxData)
+    for key in dict.keys():
+        dict[key]['ЗЕТ'] = str(int(dict[key]['Итого часов']) // 36)
     return dict

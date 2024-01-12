@@ -81,17 +81,17 @@ class MainWindow(QWidget):
             try:
                 doc = parser.ReadDocxTemplate('./examples/RPD.docx')
                 if self.rightListWidget.item(index).text() in self.discListZaoch.values():
-                    fullInfOch = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                    fullInfOch = parser.GetFullInfOchnoe(self.rightListWidget.item(index).text(),
                                                    parser.KeyFromVal(self.discListOch,
                                                                      self.rightListWidget.item(index).text()),
                                                    self.fileDataOch)
-                    fullInfZaoch = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                    fullInfZaoch = parser.GetFullInfZaochnoe(self.rightListWidget.item(index).text(),
                                                      parser.KeyFromVal(self.discListZaoch,
                                                                        self.rightListWidget.item(index).text()),
                                                      self.fileDataZaoch)
                     doc = parser.GenerateDocxOchZ(fullInfOch, fullInfZaoch, doc)
                 else:
-                    fullInf = parser.GetFullInf(self.rightListWidget.item(index).text(),
+                    fullInf = parser.GetFullInfOchnoe(self.rightListWidget.item(index).text(),
                                                 parser.KeyFromVal(self.discListOch,
                                                                   self.rightListWidget.item(index).text()),
                                                 self.fileDataOch)
