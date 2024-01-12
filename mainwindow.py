@@ -18,10 +18,8 @@ class MainWindow(QWidget):
         self.searchButton = QPushButton()
         self.searchButton.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.searchButton.setText('Search')
-        self.searchButton.clicked.connect(self.SearchButtonClicked)
         self.showAllButton = QPushButton()
         self.showAllButton.setText('Show all')
-        self.showAllButton.clicked.connect(self.ShowAllButtonClicked)
         self.searchLay = QHBoxLayout()
         self.searchLay.addWidget(self.searchLine)
         self.searchLay.addWidget(self.searchButton)
@@ -52,11 +50,14 @@ class MainWindow(QWidget):
         self.mainLay.addLayout(self.listLay)
         self.mainLay.addWidget(self.generateButton)
         self.setLayout(self.mainLay)
+
         self.leftListWidget.doubleClicked.connect(self.DoubleClickedOnLeftWidget)
         self.rightListWidget.doubleClicked.connect(self.DoubleClickedOnRightWidget)
         self.generateButton.clicked.connect(self.GenerateButtonClicked)
         self.ochButton.clicked.connect(self.OchButtonClicked)
         self.zaochButton.clicked.connect(self.ZaochButtonClicked)
+        self.searchButton.clicked.connect(self.SearchButtonClicked)
+        self.showAllButton.clicked.connect(self.ShowAllButtonClicked)
 
     def DoubleClickedOnLeftWidget(self):
         self.rightListWidget.addItem(self.leftListWidget.itemFromIndex(self.leftListWidget.currentIndex()).text())
@@ -140,6 +141,7 @@ class MainWindow(QWidget):
         self.leftListWidget.clear()
         for key in self.discListOch.keys():
             self.leftListWidget.addItem(self.discListOch[key])
+
 
 if __name__ == "__main__":
     app = QApplication([])
