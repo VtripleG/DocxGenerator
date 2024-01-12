@@ -1129,47 +1129,6 @@ def __SearchCompetenciesByDisciplineCode(disciplineCode: str, plxData: dict) -> 
     return dict
 
 
-def __SearchHoursBySemesterNumber(semesterNumber: int, disciplineCode: str, plxData: dict) -> dict:
-    codeList = []
-    hoursList = []
-    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
-        if (object['@КодТипаЧасов'] != '3') and (object['@КодОбъекта'] == disciplineCode) and (
-                (int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber) or (
-                int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == semesterNumber)):
-            if codeList.__contains__(object['@КодВидаРаботы']) == False:
-                codeList.append(object['@КодВидаРаботы'])
-                hoursList.append(object['@Количество'])
-    nameList = []
-    dict = {}
-    for key in codeList:
-        for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['СправочникВидыРабот']:
-            if object['@Код'] == key:
-                nameList.append(object['@Название'])
-    # print(hoursList)
-    # print(nameList)
-    for i in range(nameList.__len__()):
-        dict[nameList[i]] = hoursList[i]
-
-    return dict
-
-
-def __SearchHours(disciplineCode: str, plxData: dict) -> dict:
-    dict = {}
-    semesterNumberList = []
-    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
-
-        if object['@КодОбъекта'] == disciplineCode:
-            if object['@Семестр'] != '0':
-                num = int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1
-            else:
-                num = int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2)
-            if semesterNumberList.__contains__(num) == False:
-                semesterNumberList.append(num)
-    for i in range(semesterNumberList.__len__()):
-        dict[semesterNumberList[i]] = __SearchHoursBySemesterNumber(semesterNumberList[i], disciplineCode, plxData)
-    return dict
-
-
 def KeyFromVal(dict: dict, val):
     for key, value in dict.items():
         if value == val:
@@ -1238,3 +1197,148 @@ def GetFullInf(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
     dictInf['srok'] = __GetSrok(plxData)
 
     return dictInf
+
+
+def GetFullInfOchnoe(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
+    dictInf = {}
+    dictInf['Название'] = disciplineName
+    dictInf['Специальность'] = __GetSpecialization(plxData)
+    dictInf['Профиль'] = __GetProfile(plxData)
+    dictInf['Квалификация'] = __GetQualification(plxData)
+    dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
+    dictInf['Часы'] = __SearchHoursOcnoe(disciplineCode, plxData)
+    # pprint.pp(dictInf['Часы'])
+    dictInf['B1'] = __GetB1(disciplineCode, plxData)
+    dictInf['startYear'] = __GetStartYear(plxData)
+    dictInf['srok'] = __GetSrok(plxData)
+
+    return dictInf
+
+
+def GetFullInfZaochnoe(disciplineName: str, disciplineCode: str, plxData: dict) -> dict:
+    dictInf = {}
+    dictInf['Название'] = disciplineName
+    dictInf['Специальность'] = __GetSpecialization(plxData)
+    dictInf['Профиль'] = __GetProfile(plxData)
+    dictInf['Квалификация'] = __GetQualification(plxData)
+    dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
+    dictInf['Часы'] = __SearchHoursZaochnoe(disciplineCode, plxData)
+    # pprint.pp(dictInf['Часы'])
+    dictInf['B1'] = __GetB1(disciplineCode, plxData)
+    dictInf['startYear'] = __GetStartYear(plxData)
+    dictInf['srok'] = __GetSrok(plxData)
+
+    return dictInf
+
+
+def __SearchHoursBySemesterNumber(semesterNumber: int, disciplineCode: str, plxData: dict) -> dict:
+    codeList = []
+    hoursList = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+        if (object['@КодТипаЧасов'] != '3') and (object['@КодОбъекта'] == disciplineCode) and (
+                (int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber) or (
+                int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == semesterNumber)):
+            if codeList.__contains__(object['@КодВидаРаботы']) == False:
+                codeList.append(object['@КодВидаРаботы'])
+                hoursList.append(object['@Количество'])
+    nameList = []
+    dict = {}
+    for key in codeList:
+        for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['СправочникВидыРабот']:
+            if object['@Код'] == key:
+                nameList.append(object['@Название'])
+    # print(hoursList)
+    # print(nameList)
+    for i in range(nameList.__len__()):
+        dict[nameList[i]] = hoursList[i]
+
+    return dict
+
+
+def __SearchHours(disciplineCode: str, plxData: dict) -> dict:
+    dict = {}
+    semesterNumberList = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+
+        if object['@КодОбъекта'] == disciplineCode:
+            if object['@Семестр'] != '0':
+                num = int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1
+            else:
+                num = int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2)
+            if semesterNumberList.__contains__(num) == False:
+                semesterNumberList.append(num)
+    for i in range(semesterNumberList.__len__()):
+        dict[semesterNumberList[i]] = __SearchHoursBySemesterNumber(semesterNumberList[i], disciplineCode, plxData)
+    return dict
+
+
+def __SearchHoursBySemesterNumberOchnoe(semesterNumber: int, disciplineCode: str, plxData: dict) -> dict:
+    codeList = []
+    hoursList = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+        if (object['@КодТипаЧасов'] != '3' and object['@КодТипаЧасов'] != '5') and (object['@КодОбъекта'] == disciplineCode) and (
+                int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1 == semesterNumber):
+            if codeList.__contains__(object['@КодВидаРаботы']) == False:
+                codeList.append(object['@КодВидаРаботы'])
+                hoursList.append(object['@Количество'])
+    nameList = []
+    dict = {}
+    for key in codeList:
+        for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['СправочникВидыРабот']:
+            if object['@Код'] == key:
+                nameList.append(object['@Название'])
+    # print(hoursList)
+    # print(nameList)
+    for i in range(nameList.__len__()):
+        dict[nameList[i]] = hoursList[i]
+
+    return dict
+
+
+def __SearchHoursOcnoe(disciplineCode: str, plxData: dict) -> dict:
+    dict = {}
+    semesterNumberList = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+        if object['@КодОбъекта'] == disciplineCode:
+            num = int(object['@Курс']) * 2 - 1 + int(object['@Семестр']) - 1
+            if semesterNumberList.__contains__(num) == False:
+                semesterNumberList.append(num)
+    for i in range(semesterNumberList.__len__()):
+        dict[semesterNumberList[i]] = __SearchHoursBySemesterNumberOchnoe(semesterNumberList[i], disciplineCode, plxData)
+    return dict
+
+
+def __SearchHoursBySessionNumberZaochnoe(sessionNumber: int, disciplineCode: str, plxData: dict) -> dict:
+    codeList = []
+    hoursList = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+        if (object['@КодТипаЧасов'] != '3' and object['@КодТипаЧасов'] != '5') and (object['@КодОбъекта'] == disciplineCode) and (
+                int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2) == sessionNumber):
+            if codeList.__contains__(object['@КодВидаРаботы']) == False:
+                codeList.append(object['@КодВидаРаботы'])
+                hoursList.append(object['@Количество'])
+    nameList = []
+    dict = {}
+    for key in codeList:
+        for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['СправочникВидыРабот']:
+            if object['@Код'] == key:
+                nameList.append(object['@Название'])
+    # print(hoursList)
+    # print(nameList)
+    for i in range(nameList.__len__()):
+        dict[nameList[i]] = hoursList[i]
+
+    return dict
+
+
+def __SearchHoursZaochnoe(disciplineCode: str, plxData: dict) -> dict:
+    dict = {}
+    sessionNumber = []
+    for object in plxData['Документ']['diffgr:diffgram']['dsMMISDB']['ПланыНовыеЧасы']:
+        if object['@КодОбъекта'] == disciplineCode:
+            num = int(object['@Курс']) * 2 - 1 + ((int(object['@Сессия']) - 1) // 2)
+            if sessionNumber.__contains__(num) == False:
+                sessionNumber.append(num)
+    for i in range(sessionNumber.__len__()):
+        dict[sessionNumber[i]] = __SearchHoursBySessionNumberZaochnoe(sessionNumber[i], disciplineCode, plxData)
+    return dict
