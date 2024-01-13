@@ -24,6 +24,9 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
 
     zedOO = int(0)
 
+    if bool(dictFullInfOchnoe['Практическая подготовка']):
+        practicalTrainingFlagOchnoe = True
+
     for key in dictTimeOchnoe.keys():
         semestrDict = dictTimeOchnoe[key]
         if 'Курсовая работа' in semestrDict.keys():
@@ -251,6 +254,14 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
 
     for colum in timeTableOO.columns:
         for cell in colum.cells:
+            if 'practForm' in cell.text:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        if practicalTrainingFlagOchnoe:
+                            run.text = run.text.replace('practForm', '')
+                        else:
+                            if 'practForm' in run.text:
+                                paragraph.text = ''
             if 'adTimeAll' in cell.text:
                 if 'Аудиторные занятия' in dictAllTimeOO.keys():
                     cell.text = cell.text.replace('adTimeAll', dictAllTimeOO['Аудиторные занятия'])
@@ -297,7 +308,13 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
                     cell.text = ''
             if 'labTime' in cell.text:
                 if 'Лабораторные занятия' in dictTimeOchnoe[timeKeysOO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
+                    if timeKeysOO[0] in dictFullInfOchnoe['Практическая подготовка'].keys():
+                        cell.text = cell.text.replace('labTime',
+                                                      dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'] + '\n' +
+                                                      dictFullInfOchnoe['Практическая подготовка'][timeKeysOO[0]][
+                                                          'Лабораторные занятия'])
+                    else:
+                        cell.text = cell.text.replace('labTime', dictTimeOchnoe[timeKeysOO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
