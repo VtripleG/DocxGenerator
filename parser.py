@@ -454,8 +454,8 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
 
     if bool(dictFullInfOchnoe['Практическая подготовка']):
         practicalTrainingFlagOchnoe = True
-    if bool(dictTimeZaochnoe['Практическая подготовка']):
-        practicalTrainingFlagZaochnoe == True
+    if bool(dictFullInfZaochnoe['Практическая подготовка']):
+        practicalTrainingFlagZaochnoe = True
 
     for key in dictTimeOchnoe.keys():
         semestrDict = dictTimeOchnoe[key]
@@ -725,6 +725,14 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
 
     for colum in timeTableOO.columns:
         for cell in colum.cells:
+            if 'practForm' in cell.text:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        if practicalTrainingFlagOchnoe:
+                            run.text = run.text.replace('practForm', '')
+                        else:
+                            if 'practForm' in run.text:
+                                paragraph.text = ''
             if 'adTimeAll' in cell.text:
                 if 'Аудиторные занятия' in dictAllTimeOO.keys():
                     cell.text = cell.text.replace('adTimeAll', dictAllTimeOO['Аудиторные занятия'])
@@ -901,6 +909,14 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
 
     for colum in timeTableZO.columns:
         for cell in colum.cells:
+            if 'practForm' in cell.text:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        if practicalTrainingFlagZaochnoe:
+                            run.text = run.text.replace('practForm', '')
+                        else:
+                            if 'practForm' in run.text:
+                                paragraph.text = ''
             if 'adTimeAll' in cell.text:
                 if 'Аудиторные занятия' in dictAllTimeZO.keys():
                     cell.text = cell.text.replace('adTimeAll', dictAllTimeZO['Аудиторные занятия'])
@@ -947,7 +963,13 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
                     cell.text = ''
             if 'labTime' in cell.text:
                 if 'Лабораторные занятия' in dictTimeZaochnoe[timeKeysZO[0]].keys():
-                    cell.text = cell.text.replace('labTime', dictTimeZaochnoe[timeKeysZO[0]]['Лабораторные занятия'])
+                    if timeKeysZO[0] in dictFullInfZaochnoe['Практическая подготовка'].keys():
+                        cell.text = cell.text.replace('labTime',
+                                                      dictTimeZaochnoe[timeKeysZO[0]]['Лабораторные занятия'] + '\n' +
+                                                      dictFullInfZaochnoe['Практическая подготовка'][timeKeysZO[0]][
+                                                          'Лабораторные занятия'])
+                    else:
+                        cell.text = cell.text.replace('labTime', dictTimeZaochnoe[timeKeysZO[0]]['Лабораторные занятия'])
                 else:
                     cell.text = ''
             if 'lectTime' in cell.text:
@@ -1225,8 +1247,6 @@ def GetFullInfZaochnoe(disciplineName: str, disciplineCode: str, plxData: dict) 
     dictInf['Компетенции'] = __SearchCompetenciesByDisciplineCode(disciplineCode, plxData)
     dictInf['Часы'] = __SearchHoursZaochnoe(disciplineCode, plxData)
     dictInf['Практическая подготовка'] = __SearchPracticalJobsZaochnoe(disciplineCode, plxData)
-    if 'Практическая подготовка' in dictInf.keys():
-        print(dictInf['Практическая подготовка'])
     dictInf['B1'] = __GetB1(disciplineCode, plxData)
     dictInf['startYear'] = __GetStartYear(plxData)
     dictInf['srok'] = __GetSrok(plxData)
