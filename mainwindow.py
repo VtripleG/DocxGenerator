@@ -91,12 +91,12 @@ class MainWindow(QWidget):
                                                      self.fileDataZaoch)
                     doc = parser.GenerateDocxOchZ(fullInfOch, fullInfZaoch, doc)
                 else:
-                    fullInf = parser.GetFullInfOchnoe(self.rightListWidget.item(index).text(),
+                    fullInfOch = parser.GetFullInfOchnoe(self.rightListWidget.item(index).text(),
                                                 parser.KeyFromVal(self.discListOch,
                                                                   self.rightListWidget.item(index).text()),
                                                 self.fileDataOch)
-                    doc = parser.GenerateDocxOch(fullInf, doc)
-                parser.SaveDocx(doc, self.rightListWidget.item(index).text(), filePath)
+                    doc = parser.GenerateDocxOch(fullInfOch, doc)
+                parser.SaveDocx(doc, f"{self.rightListWidget.item(index).text()}_{fullInfOch['startYear']}", filePath)
             except Exception as e:
                 print(e)
                 QMessageBox.critical(self, 'Generate docx file ERROR',
@@ -126,6 +126,12 @@ class MainWindow(QWidget):
         self.discListZaoch.clear()
         self.fileDataOch = parser.XmlToDict(path)
         self.discListOch = parser.GetDisciplineList(self.fileDataOch)
+        listDeleteKeys = []
+        for key in self.discListOch.keys():
+            if self.discListOch[key].__contains__('практика'):
+                listDeleteKeys.append(key)
+        for key in listDeleteKeys:
+            self.discListOch.pop(key)
         for key in self.discListOch.keys():
             self.leftListWidget.addItem(self.discListOch[key])
 
@@ -136,6 +142,12 @@ class MainWindow(QWidget):
             return
         self.fileDataZaoch = parser.XmlToDict(path)
         self.discListZaoch = parser.GetDisciplineList(self.fileDataZaoch)
+        listDeleteKeys = []
+        for key in self.discListZaoch.keys():
+            if self.discListZaoch[key].__contains__('практика'):
+                listDeleteKeys.append(key)
+        for key in listDeleteKeys:
+            self.discListZaoch.pop(key)
 
     def ShowAllButtonClicked(self):
         self.leftListWidget.clear()

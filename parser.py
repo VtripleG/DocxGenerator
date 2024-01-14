@@ -180,6 +180,18 @@ def GenerateDocxOch(dictFullInfOchnoe: dict, doc: Document) -> Document:
         if 'attistList' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('attistList', stringAttistatList)
+        if 'Zachet' in object.text:
+            if not 'Зачет' in dictTypeWork.keys() and not 'Зачет с оценкой' in dictTypeWork.keys():
+                for run in object.runs:
+                    run.text = run.text.replace('Zachet', '')
+            else:
+                object.text = ''
+        if 'Exam' in object.text:
+            if not 'Экзамен' in dictTypeWork.keys():
+                for run in object.runs:
+                    run.text = run.text.replace('Exam', '')
+            else:
+                object.text = ''
         if 'stringTypeWork' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('stringTypeWork', stringTypeWork)
@@ -668,6 +680,18 @@ def GenerateDocxOchZ(dictFullInfOchnoe: dict, dictFullInfZaochnoe: dict, doc: Do
         if 'attistList' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('attistList', stringAttistatList)
+        if 'Zachet' in object.text:
+            if not 'Зачет' in dictTypeWork.keys() and not 'Зачет с оценкой' in dictTypeWork.keys():
+                for run in object.runs:
+                    run.text = run.text.replace('Zachet', '')
+            else:
+                object.text = ''
+        if 'Exam' in object.text:
+            if not 'Экзамен' in dictTypeWork.keys():
+                for run in object.runs:
+                    run.text = run.text.replace('Exam', '')
+            else:
+                object.text = ''
         if 'stringTypeWork' in object.text:
             for run in object.runs:
                 run.text = run.text.replace('stringTypeWork', stringTypeWork)
